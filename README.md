@@ -71,5 +71,5 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 ## Supported Android versions
 
-- Android 8.1
-- Android 9
+- Android 8.1 ([branch](https://github.com/matthewrossi/seapp/tree/android-8.1.0))
+- Android 9 ([branch](https://github.com/matthewrossi/seapp/tree/android-9.0.0))
