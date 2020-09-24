@@ -1,0 +1,32 @@
+//
+// Executable
+//
+
+cc_binary {
+    name: "restoreconservice",
+
+    srcs: [
+        "RestoreconService.cpp",
+        "restoreconservice.cpp",
+        "aidl/android/os/IRestoreconService.aidl",
+    ],
+
+    include_dirs: ["frameworks/native"],
+
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "liblog",
+        "libselinux",
+        "libutils",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-Wunreachable-code",
+    ],
+
+    init_rc: ["restoreconservice.rc"],
+}

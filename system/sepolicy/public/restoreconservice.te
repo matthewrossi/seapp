@@ -1,0 +1,39 @@
+# restorecon deamon
+type restoreconservice, domain;
+type restoreconservice_exec, exec_type, file_type;
+
+# Bypass MLS/MCS app sandbox.
+typeattribute restoreconservice mlstrustedsubject;
+
+# Required capabilities.
+allow restoreconservice self:global_capability_class_set { dac_override fowner };
+
+# Access to app sandbox file.
+allow restoreconservice app_data_file:dir r_dir_perms;
+allow restoreconservice app_data_file_type:dir r_dir_perms;
+allow restoreconservice app_data_file:file r_file_perms;
+
+# Read plat. vendor and odm file_contexts files
+allow restoreconservice file_contexts_file:file r_file_perms;
+# Look for and read /data/selinux/*/file_contexts.
+allow restoreconservice selinux_data_file:dir r_dir_perms;
+allow restoreconservice selinux_data_file:file r_file_perms;
+
+# Check validity of SELinux context before use.
+selinux_check_context(restoreconservice)
+
+# Relabel file from app_data_file to 3rd-party app's file_type.
+allow restoreconservice app_data_file:dir { relabelfrom relabelto };
+allow restoreconservice app_data_file_type:dir relabelto;
+allow restoreconservice app_data_file:file { relabelfrom relabelto };
+allow restoreconservice app_data_file_type:file relabelto;
+allow app_data_file_type labeledfs:filesystem associate;
+
+# Publish a binder service and make binder calls.
+binder_use(restoreconservice)
+binder_service(restoreconservice)
+add_service(restoreconservice, restorecon_service)
+
+# Allow installd to call into the system server so it can check permissions.
+#binder_call(installd, system_server)
+#allow installd permission_service:service_manager find;

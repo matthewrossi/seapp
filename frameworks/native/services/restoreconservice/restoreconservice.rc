@@ -1,0 +1,5 @@
+service restorecon /system/bin/restoreconservice
+    class main
+    user root
+    group root
+    capabilities DAC_OVERRIDE FOWNER
