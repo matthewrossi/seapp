@@ -1,0 +1,4 @@
+.*				u:object_r:app_data_file:s0
+files/unclassified		u:object_r:com_example_sepolicytestapp.unclassified_file:s0
+files/top-secret		u:object_r:com_example_sepolicytestapp.top_secret_file:s0
+

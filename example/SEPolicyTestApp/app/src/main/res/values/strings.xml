@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">SEPolicy Test App</string>
+    <string name="context">Current context: %1$s.</string>
+    <string name="allowed">Access to %1$s allowed.</string>
+    <string name="disallowed">Access to %1$s not allowed.</string>
+    <string name="unclassifed_button">UNCLASSIFIED</string>
+    <string name="top_secret_button">TOP-SECRET</string>
+
+    <string name="err_title">ERROR!</string>
+    <string name="err_files">Can\'t create required files.</string>
+    <string name="err_path">Can\'t get canonical path.</string>
+    <string name="err_restorecon">Can\'t restore files context.</string>
+
+    <string name="title_activity_top_secret">Top Secret</string>
+    <string name="title_activity_unclassified">Unclassified</string>
+</resources>

@@ -1,0 +1,69 @@
+(block com_example_sepolicytestapp
+
+	(type init)
+	(type init_tmpfs)
+	(type unclassified)
+	(type unclassified_tmpfs)
+	(type top_secret)
+	(type top_secret_tmpfs)
+
+	(type unclassified_file)
+	(type top_secret_file)
+
+	(typebounds untrusted_app init)
+	(typebounds untrusted_app_tmpfs init_tmpfs)
+	(typebounds untrusted_app top_secret)
+	(typebounds untrusted_app_tmpfs unclassified_tmpfs)
+	(typebounds untrusted_app unclassified)
+	(typebounds untrusted_app_tmpfs top_secret_tmpfs)
+
+	(typebounds app_data_file top_secret_file)
+	(typebounds app_data_file unclassified_file)
+
+	(typeattribute domains)
+	(typeattributeset domains (init unclassified top_secret))
+
+	(typeattributeset domain domains)	; too much
+	(typeattributeset appdomain domains)	; too much
+
+	(typeattributeset app_data_file_type (unclassified_file top_secret_file))
+
+	;subset of app_domain(untrusted_app)
+	(typetransition init tmpfs file init_tmpfs)
+	(allow init init_tmpfs (file (read execute)))
+	(typetransition unclassified tmpfs file unclassified_tmpfs)
+	(allow unclassified unclassified_tmpfs (file (read execute)))
+	(typetransition top_secret tmpfs file top_secret_tmpfs)
+	(allow top_secret top_secret_tmpfs (file (read execute)))
+
+	;subset of app_api_service
+	(allow domains activity_service (service_manager (find)))
+	(allow domains display_service (service_manager (find)))
+	(allow domains connectivity_service (service_manager (find)))
+	(allow domains uimode_service (service_manager (find)))
+	(allow domains accessibility_service (service_manager (find)))
+	(allow domains input_method_service (service_manager (find)))
+	(allow domains graphicsstats_service (service_manager (find)))
+	(allow domains input_service (service_manager (find)))
+	(allow domains audio_service (service_manager (find)))
+
+	(allow domains surfaceflinger_service (service_manager (find)))
+	(allow domains restorecon_service (service_manager (find)))
+	
+	;(allow init selinux_data_file (dir (search read)))
+	;(allow init selinux_data_file (file (open read getattr)))	
+
+	;(allow init app_data_file (file (create)))
+	(allow unclassified unclassified_file (file (read)))
+	(allow top_secret unclassified_file (file (read)))
+	(allow top_secret top_secret_file (file (read)))
+
+	;(allow init selinuxfs (file (open read write)))
+	;(allow init kernel (security (check_context)))
+	;(allow init app_data_file (file (relabelfrom)))
+	;(allow init unclassified_file (file (relabelto)))
+	;(allow init top_secret_file (file (relabelto)))
+	;(allow unclassified_file labeledfs (filesystem (associate)))
+	;(allow top_secret_file labeledfs (filesystem (associate)))	
+
+)
