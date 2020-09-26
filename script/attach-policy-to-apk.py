@@ -43,10 +43,10 @@ try:
     make_archive(os.path.splitext(tmpzip)[0], "zip", tmpdir)
     rmtree(tmpdir)
     # align the apk file
-    subprocess.run(["/home/matt/android/sdks/sdk/build-tools/28.0.3/zipalign", "-f", "-p", "4", tmpzip, output])
+    subprocess.run(["zipalign", "-f", "-p", "4", tmpzip, output])
     os.remove(tmpzip)
     # sign apk using the given signer
-    subprocess.run(["/home/matt/android/sdks/sdk/build-tools/28.0.3/apksigner", "sign", "--ks", args.signer, output])
+    subprocess.run(["apksigner", "sign", "--ks", args.signer, output])
 except OSError as err:
     print(err)
 
