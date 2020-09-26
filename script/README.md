@@ -17,6 +17,13 @@ To automate the procedure required to modify the apk and enrich it
 with the SEApp policy module, we provide the [attach-policy-to-apk.py](script/attach-policy-to-apk.py)
 script.
 
+### Prerequisites
+
+Download the Android SDK Build Tools revision correspondant to the Android
+version you are targeting and add it to your path.
+
+### Usage
+
 ```
 usage: attach-policy-to-apk.py [OPTIONS] SIGNER APP
 
