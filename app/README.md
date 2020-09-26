@@ -176,4 +176,4 @@ to the secret process:
 
 ## Example
 
-You can find a simple security-enhanced application [here](https://github.com/matthewrossi/seapp/tree/master/app/SEPolicyTestApp) and its policy module [here](https://github.com/matthewrossi/seapp/tree/master/app/SEPolicyTestApp/policy).
+You can find a simple security-enhanced application [here](app/SEPolicyTestApp) and its policy module [here](app/SEPolicyTestApp/policy).
