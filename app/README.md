@@ -46,9 +46,9 @@ global identifier is formed by the concatenation of the namespace and the local
 type identifier.
 
 The use of a namespace specific for the policy module permits to discriminate
-between local types $T_A$_ (namespace equal to the current app package
-name), types of other modules $T_{A'\neq A}$ (namespace equal to some other
-app package name), and global system types $T_S$ (system namespace).
+between local types _T<sub>A</sub>_ (namespace equal to the current app package
+name), types of other modules _T<sub>A'≠A</sub>_ (namespace equal to some other
+app package name), and global system types _T<sub>S</sub> (system namespace).
 
 Each Access Vector rule, declared by an `allow` statement, is evaluated looking
 at the source and target type identifiers.
