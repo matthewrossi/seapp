@@ -48,7 +48,7 @@ type identifier.
 The use of a namespace specific for the policy module permits to discriminate
 between local types _T<sub>A</sub>_ (namespace equal to the current app package
 name), types of other modules _T<sub>A'≠A</sub>_ (namespace equal to some other
-app package name), and global system types _T<sub>S</sub> (system namespace).
+app package name), and global system types _T<sub>S</sub>_ (system namespace).
 
 Each Access Vector rule, declared by an `allow` statement, is evaluated looking
 at the source and target type identifiers.
