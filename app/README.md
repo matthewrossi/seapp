@@ -57,7 +57,7 @@ Here are the emerging cases and how they are constrained:
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/15113769/94330301-a333ad80-ffc3-11ea-8133-fc023bfe5275.png"
-        alt="Varieties of allow statements" width="70%">
+        alt="Varieties of allow statements" width="50%">
 </p>
 
 - _AllowSS_ is prohibited, , as it represents a direct platform policy
