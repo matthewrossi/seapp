@@ -1,4 +1,4 @@
-# SEApp policy modules
+# SEApp Policy Modules
 
 To support the use of ad-hoc Mandatory Access Control policies, we want the
 developer to have control of the security context of subjects (i.e., processes)
