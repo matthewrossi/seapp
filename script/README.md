@@ -1,6 +1,6 @@
 # Scripts
 
-## [attach-policy-to-apk.py](script/attach-policy-to-apk.py)
+## [attach-policy-to-apk.py](attach-policy-to-apk.py)
 
 Developers interested in taking advantage of our approach to improve the
 security of their apps are required to load the policy into their Android
@@ -14,7 +14,7 @@ SEApp-aware package installer will be looking for the policy module.
 </p>
 
 To automate the procedure required to modify the apk and enrich it
-with the SEApp policy module, we provide the [attach-policy-to-apk.py](script/attach-policy-to-apk.py)
+with the SEApp policy module, we provide the [attach-policy-to-apk.py](attach-policy-to-apk.py)
 script.
 
 ### Prerequisites
