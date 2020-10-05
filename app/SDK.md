@@ -20,7 +20,7 @@ API by building the SEApp SDK and using it within their IDE.
 
 ## Build it
 
-Follow the instruction in [Enstablishing a Build Environment](https://android.googlesource.com/platform/sdk/+/master/docs/howto_build_SDK.txt)
+Follow the instruction in [Enstablishing a Build Environment](https://github.com/matthewrossi/seapp#enstablishing-a-build-environment)
 and then the instructions in [How To Build SDK](https://android.googlesource.com/platform/sdk/+/master/docs/howto_build_SDK.txt),
 skipping those steps to download the source, as you already have the AOSP source tree.
 
