@@ -25,20 +25,18 @@ version you are targeting and add it to your path.
 ### Usage
 
 ```
-usage: attach-policy-to-apk.py [OPTIONS] SIGNER APP
+usage: attach-policy-to-apk.py [-h] [-i INPUT] [-o OUTPUT] [-p POLICY] [-s SIGNER]
 
-Change apk to include its policy module.
-
-positional arguments:
-  SIGNER                keystore to sign the apk
-  APP                   app project directory
+Utility to attach a policy module to an app
 
 optional arguments:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
-                        original apk
-  -p POLICY, --policy POLICY
-                        policy module directory
+                        unsigned apk location
   -o OUTPUT, --output OUTPUT
-                        modified apk
+                        signed apk location
+  -p POLICY, --policy POLICY
+                        policy module directory location
+  -s SIGNER, --signer SIGNER
+                        location to the keystore to sign the APK
 ```
