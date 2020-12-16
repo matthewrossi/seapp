@@ -1,0 +1,2 @@
+# explicitly exclude the file to avoid overriding in multile push-pull
+mac_permissions.xml
