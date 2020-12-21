@@ -49,7 +49,7 @@ it is possible to specify their default values within the configuration files:
 - `.policy_default_path`: path to the policy module directory
 - `.signer`:              path to the keystore used to sign the APK
 
-NOTE: The configuration files need to be within the directory where the
+NOTE: the configuration files need to be within the directory where the
 script is run.
 
 ## [backup.sh](backup.sh)
@@ -82,3 +82,33 @@ Usage:
     -h  display help
     -s  source tree directory (defaults to current directory)
 ```
+
+## [post_process_mac_perms.py](post_process_mac_perms.py)
+
+A tool to help modify an existing `mac_permissions.xml` with additional app
+certs not already found in that policy. This becomes useful when a directory
+containing apps is searched and the certs from those apps are added to the
+policy not already explicitly listed.
+
+### mac_permissions.xml
+
+The mac_permissions.xml file is used for controlling the Middleware MAC
+solutions, as well as mapping a public base16 signing key with an arbitrary
+`seinfo` string. Details of the files contents can be found in a comment at 
+the top of the platform [mac_permissions.xml](https://android.googlesource.com/platform/system/sepolicy/+/refs/tags/android-9.0.0_r39/private/mac_permissions.xml) file.
+The seinfo string, previously mentioned, is the same string that is
+referenced in `seapp_contexts`.
+### Usage
+
+```
+Usage:
+  post_process_mac_perms [-h] -s SEINFO -d DIR -f POLICY
+
+  -s SEINFO, --seinfo SEINFO  seinfo tag for each generated stanza
+  -d DIR, --dir DIR           Directory to search for apks
+  -f POLICY, --file POLICY    mac_permissions.xml policy file
+```
+
+NOTE: to highlight the need to create a valid mac_permissions.xml in the
+SEApp policy module based on your app signer, we substituted our version of
+the mac_permissions.xml with a [template](../app/SEPolicyTestApp/policy/mac_permissions_template.xml) you can enrich by using the [post_process_mac_perms.py](post_process_mac_perms.py) tool.
