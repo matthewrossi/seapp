@@ -77,3 +77,14 @@ lint/tmp/
 # Android Profiling
 *.hprof
 
+# attach-policy-to-apk.py configuration files
+.unsigned_apk_path
+.signed_apk_path
+.policy_default_path
+.signer
+
+# do not upload signer artifacts
+app-signed.apk.idsig
+
+# do not upload mc_permissions.xml as it depends on the signer
+mac_permissions.xml

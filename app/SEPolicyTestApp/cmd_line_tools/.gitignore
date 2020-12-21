@@ -1,6 +1,0 @@
-.unsigned_apk_path
-.signed_apk_path
-.policy_default_path
-.signer
-app-signed.apk.idsig
-app-signed.apk
