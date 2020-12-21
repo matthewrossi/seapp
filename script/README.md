@@ -41,6 +41,17 @@ optional arguments:
                         location to the keystore to sign the APK
 ```
 
+To avoid the specification of every parameter everytime the script is run
+it is possible to specify their default values within the configuration files:
+
+- `.unsigned_apk_path`:   path to the unsigned apk
+- `.signed_apk_path`:     path to the signed apk
+- `.policy_default_path`: path to the policy module directory
+- `.signer`:              path to the keystore used to sign the APK
+
+NOTE: The configuration files need to be within the directory where the
+script is run.
+
 ## [backup.sh](backup.sh)
 
 Automates the creation of a backup by making a copy of all those files with
