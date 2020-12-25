@@ -16599,6 +16599,7 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             if (hasSEPolicy(pkg)) {
                 if (DEBUG_SEPOLICY) Slog.d(TAG, pkgName + " is a SEPolicy app");
+                // TODO: Move policy module installation to installd
                 extractSEPolicyFiles(pkg, res);
                 validateSEPolicyFiles(pkg, res);
                 if (res.returnCode == PackageManager.INSTALL_SUCCEEDED) {

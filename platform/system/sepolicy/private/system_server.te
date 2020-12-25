@@ -345,7 +345,6 @@ allow system_server apk_tmp_file:dir create_dir_perms;
 allow system_server apk_tmp_file:file create_file_perms;
 
 # Manage /data/selinux
-# TODO: move this to installd
 allow system_server selinux_data_file:dir create_dir_perms;
 allow system_server selinux_data_file:file create_file_perms;
 
