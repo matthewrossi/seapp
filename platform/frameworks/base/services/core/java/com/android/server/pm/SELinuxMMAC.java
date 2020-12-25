@@ -155,14 +155,14 @@ public final class SELinuxMMAC {
 
                     switch (parser.getName()) {
                         case "signer":
-                            String macPermissionPath = macPermission.getAbsolutePath();
-                            if (macPermissionPath.startsWith(DATA_SELINUX_PREFIX)) {
+                            String path = macPermission.getAbsolutePath();
+                            if (path.startsWith(DATA_SELINUX_PREFIX)) {
                                 // skip the /data/selinux/ part
                                 int start = DATA_SELINUX_PREFIX.length();
                                 // ignore /mac_permissions.xml
-                                int end = macPermissionPath.indexOf("/mac_permissions.xml");
+                                int end = path.indexOf("/mac_permissions.xml");
                                 policies.add(readSignerOrThrow(parser,
-                                        macPermissionPath.substring(start, end)));
+                                        path.substring(start, end)));
                             } else {
                                 policies.add(readSignerOrThrow(parser, null));
                             }
@@ -232,7 +232,7 @@ public final class SELinuxMMAC {
         }
 
         Policy newPolicy = null;
-        File macPermissionFile = new File(DATA_SELINUX_PREFIX + pkgName
+        File macPermission = new File(DATA_SELINUX_PREFIX + pkgName
                 + "/mac_permissions.xml");
 
         Slog.w(TAG, DATA_SELINUX_PREFIX + pkgName + "/mac_permissions.xml");
@@ -240,8 +240,8 @@ public final class SELinuxMMAC {
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
         try {
-            policyFile = new FileReader(macPermissionFile);
-            Slog.d(TAG, "Using policy file " + macPermissionFile);
+            policyFile = new FileReader(macPermission);
+            Slog.d(TAG, "Using policy file " + macPermission);
 
             parser.setInput(policyFile);
             parser.nextTag();
@@ -265,13 +265,13 @@ public final class SELinuxMMAC {
             StringBuilder sb = new StringBuilder("Exception @");
             sb.append(parser.getPositionDescription());
             sb.append(" while parsing ");
-            sb.append(macPermissionFile);
+            sb.append(macPermission);
             sb.append(":");
             sb.append(ex);
             Slog.w(TAG, sb.toString());
             return false;
         } catch (IOException ioe) {
-            Slog.w(TAG, "Exception parsing " + macPermissionFile, ioe);
+            Slog.w(TAG, "Exception parsing " + macPermission, ioe);
             return false;
         } finally {
             IoUtils.closeQuietly(policyFile);
@@ -284,7 +284,7 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             if (policySort.foundDuplicate()) {
                 sPolicies.remove(newPolicy);
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
+                Slog.w(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
                 return false;
             }
 
@@ -294,7 +294,7 @@ public final class SELinuxMMAC {
                 }
             }
 
-            sMacPermissions.add(macPermissionFile);
+            sMacPermissions.add(macPermission);
             return true;
         }
     }
@@ -454,24 +454,26 @@ public final class SELinuxMMAC {
      * mac_permissions.xml file consult the source code located
      * at system/sepolicy/mac_permissions.xml.
      *
+     * @param macPermission a File object of the mac_permissions.xml file in the SEApp
+     *         policy module.
      * @return String indicating if policy is valid. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
      *         constructed policy stanzas.
      */
-    public static String getSeInfo(File macPermissionFile) {
+    public static String getSeInfo(File macPermission) {
 
-        String macPermissionPath = macPermissionFile.getAbsolutePath();
+        String path = macPermission.getAbsolutePath();
         int start = DATA_SELINUX_PREFIX.length();
-        int end = macPermissionPath.indexOf("/mac_permissions.xml");
-        String pkgName = macPermissionPath.substring(start, end);
+        int end = path.indexOf("/mac_permissions.xml");
+        String pkgName = path.substring(start, end);
 
         boolean foundSigner = false;
         Policy policy = null;
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
         try {
-            policyFile = new FileReader(macPermissionFile);
-            Slog.d(TAG, "Extracting seinfo from " + macPermissionFile);
+            policyFile = new FileReader(macPermission);
+            Slog.d(TAG, "Extracting seinfo from " + macPermission);
 
             parser.setInput(policyFile);
             parser.nextTag();
@@ -488,7 +490,7 @@ public final class SELinuxMMAC {
                             policy = readSignerOrThrow(parser, pkgName);
                             foundSigner = true;
                         } else {
-                            Slog.w(TAG, "Exception parsing " + macPermissionFile
+                            Slog.w(TAG, "Exception parsing " + macPermission
                                     + " multiple signers definition");
                             return null;
                         }
@@ -502,13 +504,13 @@ public final class SELinuxMMAC {
             StringBuilder sb = new StringBuilder("Exception @");
             sb.append(parser.getPositionDescription());
             sb.append(" while parsing ");
-            sb.append(macPermissionFile);
+            sb.append(macPermission);
             sb.append(":");
             sb.append(ex);
             Slog.w(TAG, sb.toString());
             return null;
         } catch (IOException ioe) {
-            Slog.w(TAG, "Exception parsing " + macPermissionFile, ioe);
+            Slog.w(TAG, "Exception parsing " + macPermission, ioe);
             return null;
         } finally {
             IoUtils.closeQuietly(policyFile);
@@ -532,7 +534,7 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             sPolicies.remove(policy);
             if (policySort.foundDuplicate()) {
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
+                Slog.w(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
                 return null;
             }
         }
