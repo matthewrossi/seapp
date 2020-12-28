@@ -1029,7 +1029,7 @@ static Result<Success> do_init_user0(const BuiltinArguments& args) {
 // TODO: try to move all policy reload code in android_platform.c to avoid code duplication
 //       so that it could potentially be called also from installd
 
-std::vector<std::string> get3rdParty(const char *filename) {
+static std::vector<std::string> get3rdParty(const char *filename) {
     std::string path("/data/selinux/");
     DIR *dir = opendir(path.c_str());
     if (dir == NULL) {
