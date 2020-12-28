@@ -1181,7 +1181,7 @@ const BuiltinFunctionMap::Map& BuiltinFunctionMap::map() const {
         {"init_user0",              {0,     0,    {false,  do_init_user0}}},
         {"insmod",                  {1,     kMax, {true,   do_insmod}}},
         {"installkey",              {1,     1,    {false,  do_installkey}}},
-        {"load_policy",             {0,     0,    {true,   do_load_policy}}},   // what is the bool for?
+        {"load_policy",             {0,     0,    {false,   do_load_policy}}},   // what is the bool for?
         {"load_persist_props",      {0,     0,    {false,  do_load_persist_props}}},
         {"load_system_props",       {0,     0,    {false,  do_load_system_props}}},
         {"loglevel",                {1,     1,    {false,  do_loglevel}}},
