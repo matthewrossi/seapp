@@ -1,0 +1,32 @@
+; seapp macros
+
+(macro md_appdomain ((type SRC_INT_T) (type DST_INT_T))
+       (typebounds untrusted_app_tmpfs DST_INT_T)
+       
+       (typeattributeset coredomain (SRC_INT_T))
+       (typeattributeset domain (SRC_INT_T))   
+       (typeattributeset appdomain (SRC_INT_T))
+
+       (typetransition SRC_INT_T tmpfs file DST_INT_T)
+       (allow SRC_INT_T DST_INT_T (file (read execute)))
+       )
+       
+(macro md_netdomain ((type SRC_INT_T))
+       (typeattributeset netdomain (SRC_INT_T))   
+       )
+       
+(macro md_bluetoothdomain ((type SRC_INT_T))
+       (typeattributeset bluetoothdomain (SRC_INT_T))   
+       )
+       
+(macro md_untrusteddomain ((type SRC_INT_T) (type DST_INT_T))
+       (typeattributeset untrusted_app_all (SRC_INT_T))
+       (call md_appdomain (SRC_INT_T DST_INT_T))
+       (call md_netdomain (SRC_INT_T))
+       (call md_bluetoothdomain (SRC_INT_T))
+       )
+       
+(macro mt_appdatafile ((type SRC_INT_T))
+       (typeattributeset app_data_file_type (SRC_INT_T))       
+       )
+       

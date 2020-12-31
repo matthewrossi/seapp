@@ -2862,6 +2862,12 @@ binder::Status InstalldNativeService::reloadSELinuxPolicy() {
     // * mapping -- mapping policy which helps preserve forward-compatibility of non-platform policy
     //   with newer versions of platform policy.
     //
+    // With our approach each time a new SEApp module is installed, the selinux policy needs
+    // potentially to be re-compiled.
+    // secilc is invoked to compile the above three policy files into a single monolithic policy
+    // file. SEApp macros and SEApp policy files also are loaded in this step.
+    // This file is then loaded into the kernel.
+
     // secilc is invoked to compile the above three policy files into a single monolithic policy
     // file. This file is then loaded into the kernel.
 
@@ -2931,6 +2937,13 @@ binder::Status InstalldNativeService::reloadSELinuxPolicy() {
     if (!odm_policy_cil_file.empty()) {
         compile_args.push_back(odm_policy_cil_file.c_str());
     }
+
+    // target all the macros
+    std::string seapp_macros_policy_cil_file("/system/etc/selinux/seapp_macros_sepolicy_cil_file.cil");
+    LOG(INFO) << "SEApp macros: " << seapp_macros_policy_cil_file;
+    compile_args.push_back(seapp_macros_policy_cil_file.c_str());
+
+    // also target all policy modules
     std::vector<std::string> policies = get3rdParty("sepolicy.cil");
     for (auto const& policy : policies) {
         LOG(INFO) << "3rd-party app: " << policy;
