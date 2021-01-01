@@ -235,9 +235,9 @@ public class PolicyParser {
                 return false;
             }
 
-            // types have to be different to untrusted_app, app_data_file and any other type-attribute,
-            // thus the global (i.e., the platform's) untrusted_app and app_data_file will be used
-            // by to bound the types defined locally
+            // types have to be different to untrusted_app, app_data_file and any other type-attribute.
+            // The the global (i.e., the platform's) untrusted_app and app_data_file will be used
+            // to bound the types defined locally
             for (String type : types)
                 if (type.equals(UNTRUSTED_APP) || type.equals(APP_DATA_FILE)
                         || typeattribute.contains(type)) {
@@ -571,6 +571,18 @@ public class PolicyParser {
                                 " but is bounded to app_data_file");
                     return false;
                 }
+            // only locally defined types can be used in macros call argument input list
+            ArrayList<String> macro_types = new ArrayList<>();
+            macro_types.addAll(file_types);
+            macro_types.addAll(domain_types);
+            for (String type: macro_types)
+                if (!types.contains(type)){
+                    if (DEBUG_SEPOLICY)
+                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") is used in the " +
+                                "a call to macro argument list but it is not a localtype");
+                    return false;
+                }
+
             return true;
         }
 
