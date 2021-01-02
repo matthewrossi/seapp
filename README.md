@@ -55,7 +55,7 @@ Ensure your system meets the [hardware and software requirements](https://source
 Set up your local work environment to build the Android source files.
 See [Establishing a Build Environment](https://source.android.com/setup/build/initializing) for installation instructions by operating system.
 
-Download the source tree for the specific `android-9.0.0_r39` code-line, which is what this branch is based on.
+Download the source tree for the specific `android-10.0.0_r41` code-line, which is what this branch is based on.
 See [Downloading the Source](https://source.android.com/setup/build/downloading) for the step-by-step instructions.
 
 Finally, overwrite the AOSP files with the ones provided in this repository to
@@ -67,10 +67,11 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 ## Tested on
 
-- Pixel 2 XL ([binaries](https://developers.google.com/android/drivers#taimenpq3a.190505.001))
-- Pixel 3 ([binaries](https://developers.google.com/android/drivers#bluelinepq3a.190505.002))
+- Pixel 2 XL ([binaries](https://developers.google.com/android/drivers#taimenqq3a.200805.001))
+- Pixel 3 ([binaries](https://developers.google.com/android/drivers#bluelineqq3a.200805.001))
 
 ## Supported Android versions
 
 - Android 8.1 ([branch](https://github.com/matthewrossi/seapp/tree/android-8.1.0))
 - Android 9 ([branch](https://github.com/matthewrossi/seapp/tree/android-9.0.0))
+- Android 10 ([branch](https://github.com/matthewrossi/seapp/tree/android-10.0.0))
