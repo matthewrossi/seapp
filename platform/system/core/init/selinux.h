@@ -23,11 +23,13 @@
 namespace android {
 namespace init {
 
-void SelinuxInitialize();
+constexpr const char plat_policy_cil_file[] = "/system/etc/selinux/plat_sepolicy.cil";
+
+int SetupSelinux(char** argv);
 void SelinuxRestoreContext();
 
 void SelinuxSetupKernelLogging();
-bool SelinuxHasVendorInit();
+int SelinuxGetVendorAndroidVersion();
 
 void SelabelInitialize();
 bool SelabelLookupFileContext(const std::string& key, int type, std::string* result);
@@ -38,7 +40,6 @@ bool SelabelLookupFileContextBestMatch(const std::string& key,
 bool ForkExecveAndWaitForCompletion(const char* filename, char* const argv[]);
 bool ReadFirstLine(const char* file, std::string* line);
 bool GetVendorMappingVersion(std::string*);
-constexpr const char plat_policy_cil_file[] = "/system/etc/selinux/plat_sepolicy.cil";
 
 }  // namespace init
 }  // namespace android

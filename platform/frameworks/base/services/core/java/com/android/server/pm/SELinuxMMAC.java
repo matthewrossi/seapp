@@ -17,8 +17,8 @@
 package com.android.server.pm;
 
 import android.content.pm.PackageParser;
-import android.content.pm.Signature;
 import android.content.pm.PackageParser.SigningDetails;
+import android.content.pm.Signature;
 import android.os.Environment;
 import android.util.Slog;
 import android.util.Xml;
@@ -51,7 +51,7 @@ public final class SELinuxMMAC {
 
     static final String TAG = "SELinuxMMAC";
 
-    private static final boolean DEBUG_POLICY = false;
+    private static final boolean DEBUG_POLICY = true;
     private static final boolean DEBUG_POLICY_INSTALL = DEBUG_POLICY || false;
     private static final boolean DEBUG_POLICY_ORDER = DEBUG_POLICY || false;
 
@@ -82,6 +82,13 @@ public final class SELinuxMMAC {
         // Platform mac permissions.
         sMacPermissions.add(new File(
             Environment.getRootDirectory(), "/etc/selinux/plat_mac_permissions.xml"));
+
+        // Product mac permissions (optional).
+        final File productMacPermission = new File(
+                Environment.getProductDirectory(), "/etc/selinux/product_mac_permissions.xml");
+        if (productMacPermission.exists()) {
+            sMacPermissions.add(productMacPermission);
+        }
 
         // Vendor mac permissions.
         // The filename has been renamed from nonplat_mac_permissions to
@@ -157,12 +164,10 @@ public final class SELinuxMMAC {
                         case "signer":
                             String path = macPermission.getAbsolutePath();
                             if (path.startsWith(DATA_SELINUX_PREFIX)) {
-                                // skip the /data/selinux/ part
                                 int start = DATA_SELINUX_PREFIX.length();
-                                // ignore /mac_permissions.xml
                                 int end = path.indexOf("/mac_permissions.xml");
-                                policies.add(readSignerOrThrow(parser,
-                                        path.substring(start, end)));
+                                String pkgName = path.substring(start, end);
+                                policies.add(readSignerOrThrow(parser, pkgName));
                             } else {
                                 policies.add(readSignerOrThrow(parser, null));
                             }
@@ -218,6 +223,8 @@ public final class SELinuxMMAC {
      * mac_permissions.xml file consult the source code located
      * at system/sepolicy/mac_permissions.xml.
      *
+     * @param pkgName String representing the package name of the installed SEApp
+     *         policy module.
      * @return boolean indicating if policy was correctly loaded. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
      *         constructed policy stanzas. A value of true means that all stanzas
@@ -232,10 +239,7 @@ public final class SELinuxMMAC {
         }
 
         Policy newPolicy = null;
-        File macPermission = new File(DATA_SELINUX_PREFIX + pkgName
-                + "/mac_permissions.xml");
-
-        Slog.w(TAG, DATA_SELINUX_PREFIX + pkgName + "/mac_permissions.xml");
+        File macPermission = new File(DATA_SELINUX_PREFIX + pkgName + "/mac_permissions.xml");
 
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
@@ -260,7 +264,7 @@ public final class SELinuxMMAC {
                         skip(parser);
                 }
             }
-        } catch (IllegalStateException | IllegalArgumentException |
+        } catch (IllegalStateException | IllegalArgumentException | 
                 XmlPullParserException ex) {
             StringBuilder sb = new StringBuilder("Exception @");
             sb.append(parser.getPositionDescription());
@@ -284,7 +288,7 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             if (policySort.foundDuplicate()) {
                 sPolicies.remove(newPolicy);
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
+                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
                 return false;
             }
 
@@ -302,6 +306,9 @@ public final class SELinuxMMAC {
     /**
      * Remove the mac_permissions.xml file containing the seinfo assignments used to
      * label the uninstalled app.
+     *
+     * @param pkgName String representing the package name of the removed SEApp
+     *         policy module.
      */
     public static void removeInstallPolicy(String pkgName) {
         synchronized (sPolicies) {
@@ -311,18 +318,19 @@ public final class SELinuxMMAC {
                 return;
             }
 
-            boolean removed = false;
-            for (int i = sMacPermissions.size() -1; !removed && i >= 0; i--) {
-                if (sMacPermissions.get(i).getAbsolutePath().contains(pkgName)) {
+            for (int i = sMacPermissions.size() - 1; i >= 0; --i) {
+                String path = sMacPermissions.get(i).getAbsolutePath();
+                if (path.contains(pkgName)) {
                     sMacPermissions.remove(i);
-                    removed = true;
                     if (DEBUG_POLICY)
                         Slog.d(TAG, pkgName + " mac_permissions.xml file reference removed");
+                    break;
                 }
             }
 
-            for (int i = sPolicies.size() - 1; i >= 0; --i) {
-                if (pkgName.equals(sPolicies.get(i).getPackageName())) {
+            for (int i = 0; i < sPolicies.size(); ++i) {
+                String policyPkgName = sPolicies.get(i).getPackageName();
+                if (pkgName.equals(policyPkgName)) {
                     sPolicies.remove(i);
                     if (DEBUG_POLICY)
                         Slog.d(TAG, pkgName + " mac_permissions.xml has been removed");
@@ -347,8 +355,8 @@ public final class SELinuxMMAC {
      * @throws IllegalStateException if any of the invariants fail when constructing
      *         the {@link Policy} instance.
      */
-    private static Policy readSignerOrThrow(XmlPullParser parser, String pkgName) throws IOException,
-            XmlPullParserException {
+    private static Policy readSignerOrThrow(XmlPullParser parser, String pkgName)
+            throws IOException, XmlPullParserException {
 
         parser.require(XmlPullParser.START_TAG, null, "signer");
         Policy.PolicyBuilder pb = new Policy.PolicyBuilder(pkgName);
@@ -534,7 +542,7 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             sPolicies.remove(policy);
             if (policySort.foundDuplicate()) {
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
+                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
                 return null;
             }
         }

@@ -1,11 +1,26 @@
 ;; new_objects - a collection of types that have been introduced that have no
 ;;   analogue in older policy.  Thus, we do not need to map these types to
 ;;   previous ones.  Add here to pass checkapi tests.
+(type new_objects)
 (typeattribute new_objects)
 (typeattributeset new_objects
-  ( adbd_exec
+  ( new_objects
+    activity_task_service
+    adb_service
+    adbd_exec
+    app_binding_service
+    apex_data_file
+    apex_metadata_file
+    apex_mnt_dir
+    apex_service
+    apexd
+    apexd_exec
+    apexd_prop
+    apexd_tmpfs
+    app_zygote
     atrace
     binder_calls_stats_service
+    biometric_service
     bootloader_boot_reason_prop
     blank_screen
     blank_screen_exec
@@ -16,11 +31,18 @@
     broadcastradio_service
     cache_selinux_file
     cgroup_bpf
+    charger_exec
+    color_display_service
+    content_capture_service
     crossprofileapps_service
     ctl_interface_restart_prop
     ctl_interface_start_prop
     ctl_interface_stop_prop
     ctl_sigstop_prop
+    device_config_boot_count_prop
+    device_config_reset_performed_prop
+    device_config_netd_native_prop
+    dnsresolver_service
     e2fs
     e2fs_exec
     exfat
@@ -48,8 +70,13 @@
     exported3_default_prop
     exported3_radio_prop
     exported3_system_prop
+    fastbootd
     fingerprint_vendor_data_file
+    flags_health_check
+    flags_health_check_exec
     fs_bpf
+    fwk_stats_hwservice
+    hal_atrace_hwservice
     hal_audiocontrol_hwservice
     hal_authsecret_hwservice
     hal_broadcastradio_hwservice
@@ -57,6 +84,7 @@
     hal_codec2_hwservice
     hal_confirmationui_hwservice
     hal_evs_hwservice
+    hal_health_storage_hwservice
     hal_lowpan_hwservice
     hal_neuralnetworks_hwservice
     hal_secure_element_hwservice
@@ -65,20 +93,40 @@
     hal_usb_gadget_hwservice
     hal_vehicle_hwservice
     hal_wifi_offload_hwservice
+    heapprofd
+    heapprofd_exec
+    heapprofd_socket
     incident_helper
     incident_helper_exec
+    iorapd
+    iorapd_data_file
+    iorapd_exec
+    iorapd_service
+    iorapd_tmpfs
     kmsg_debug_device
     last_boot_reason_prop
+    llkd
+    llkd_exec
+    llkd_prop
+    llkd_tmpfs
+    looper_stats_service
     lowpan_device
     lowpan_prop
     lowpan_service
+    mediaswcodec
+    mediaswcodec_exec
+    mediaswcodec_tmpfs
     mediaextractor_update_service
     mediaprovider_tmpfs
     metadata_file
+    mnt_product_file
     mnt_vendor_file
     netd_stable_secret_prop
+    network_stack
+    network_stack_service
     network_watchlist_data_file
     network_watchlist_service
+    overlayfs_file
     package_native_service
     perfetto
     perfetto_exec
@@ -86,10 +134,14 @@
     perfetto_traces_data_file
     perfprofd_service
     property_info
+    recovery_socket
     restorecon_service
     restoreconservice
     restoreconservice_exec
     restoreconservice_tmpfs
+    role_service
+    runas_app
+    runtime_service
     secilc
     secilc_exec
     secure_element
@@ -97,7 +149,11 @@
     secure_element_tmpfs
     secure_element_service
     selinux_data_file
+    server_configurable_flags_data_file
+    simpleperf_app_runner
+    simpleperf_app_runner_exec
     slice_service
+    staging_data_file
     stats
     stats_data_file
     stats_exec
@@ -109,8 +165,11 @@
     statsdw_socket
     statscompanion_service
     storaged_data_file
+    super_block_device
     sysfs_fs_ext4_features
     system_boot_reason_prop
+    system_bootstrap_lib_file
+    system_lmk_prop
     system_net_netd_hwservice
     system_update_service
     test_boot_reason_prop
@@ -119,6 +178,8 @@
     thermalserviced
     thermalserviced_exec
     thermalserviced_tmpfs
+    time_prop
+    timedetector_service
     timezone_service
     tombstoned_java_trace_socket
     tombstone_wifi_data_file
@@ -138,6 +199,7 @@
     update_engine_log_data_file
     vendor_default_prop
     vendor_security_patch_level_prop
+    uri_grants_service
     usbd
     usbd_exec
     usbd_tmpfs
@@ -147,9 +209,11 @@
     vold_prepare_subdirs
     vold_prepare_subdirs_exec
     vold_service
+    vrflinger_vsync_service
     wait_for_keymaster
     wait_for_keymaster_exec
     wait_for_keymaster_tmpfs
+    watchdogd_tmpfs
     wpantund
     wpantund_exec
     wpantund_service
@@ -159,8 +223,9 @@
 ;; private_objects - a collection of types that were labeled differently in
 ;;     older policy, but that should not remain accessible to vendor policy.
 ;;     Thus, these types are also not mapped, but recorded for checkapi tests
+(type priv_objects)
 (typeattribute priv_objects)
 (typeattributeset priv_objects
-     ( adbd_tmpfs
-       untrusted_app_27_tmpfs
-     ))
+  ( priv_objects
+    adbd_tmpfs
+    untrusted_app_27_tmpfs))

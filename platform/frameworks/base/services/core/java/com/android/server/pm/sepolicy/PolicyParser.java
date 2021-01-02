@@ -14,12 +14,13 @@ import java.util.List;
 public class PolicyParser {
 
     private static final String TAG = "PolicyParser";
-    private static final boolean DEBUG_SEPOLICY = true;
+    private static final boolean DEBUG_SEPOLICY = false;
 
     private static final String UNTRUSTED_APP = "untrusted_app";
     private static final String ISOLATED_APP = "isolated_app";
 
     private static final String APP_DATA_FILE = "app_data_file";
+    private static final String APPDOMAIN_TMPFS = "appdomain_tmpfs";
 
     private static final String CIL_KEY_BLOCK = "block";
     private static final String CIL_KEY_SELF = "self";
@@ -28,7 +29,6 @@ public class PolicyParser {
     private static final String CIL_KEY_TYPEATTRIBUTE  = "typeattribute";
     private static final String CIL_KEY_TYPEATTRIBUTESET  = "typeattributeset"; // doesn't support expr
     private static final String CIL_KEY_TYPETRANSITION  = "typetransition";
-    private static final String CIL_KEY_CALL  = "call"; // doesn't support input lists with more than 1 argument
 
     private static final ArrayList<String> CIL_KEY_AVRULES = new ArrayList<>(
             Arrays.asList("allow", "auditallow", "dontaudit", "neverallow", "allowx", "auditallowx",
@@ -37,7 +37,7 @@ public class PolicyParser {
 
     private static final ArrayList<String> CIL_KEY_UNSUPPORTED = new ArrayList<>(
             Arrays.asList(
-                    "*", "tunableif", "typechange", "tunable", "role", "user",
+                    "*", "tunableif", "typechange", "call", "tunable", "role", "user",
                     "userattribute", "userattributeset", "sensitivity", "category", "categoryset",
                     "level", "levelrange", "class", "ipaddr", "classmap", "classpermission",
                     "boolean", "string", "name", "handleunknown", "blockinherit", "blockabstract",
@@ -56,39 +56,18 @@ public class PolicyParser {
                     "in", "mls", "defaultrange", "permissionx")
     );
 
-    private static final ArrayList<String> SEAPP_MACRO_SUPPORTED = new ArrayList<>(
-            // list of available seapp macros
-      Arrays.asList(
-              "md_appdomain", "md_netdomain", "md_bluetoothdomain", "md_untrusteddomain",
-              "mt_appdatafile"
-      )
-    );
-
-    private static final ArrayList<String> SEAPP_MACRO_EXPANDED = new ArrayList<>(
-            // list of available seapp macros
-            Arrays.asList(
-                    "md_appdomain", "md_untrusteddomain"
-            )
-    );
-
     public static class ParseTree {
 
         private NonTerminal root, current;
 
         private String namespace;
         private ArrayList<String> types;
-        private ArrayList<String> typetransition_dest;
-        private ArrayList<String> typetransition_src;
-        private ArrayList<String> typeattribute;
         private HashMap<String, ArrayList<String>> typebounds;
+        private ArrayList<String> typetransition;
+        private ArrayList<String> typeattribute;
         private HashMap<String, ArrayList<String>> typeattributeset;
-        private HashSet<String> avrule_src;  // to avoid slowing down on duplicates
-        private HashSet<String> avrule_tgt;  // to avoid slowing down on duplicates
-        private HashMap<String, ArrayList<String>> macros;
-        private ArrayList<String> tmpfs_types;
-        private ArrayList<String> file_types;
-        private ArrayList<String> domain_types;
-        private ArrayList<String> bounded_to_untrusted_app, bounded_to_app_data_file;
+        private HashSet<String> avrule_src;
+        private HashSet<String> avrule_tgt;
 
         public ParseTree() {
             root = new NonTerminal(null);
@@ -96,45 +75,12 @@ public class PolicyParser {
 
             namespace = null;
             types = new ArrayList<>();
-            typetransition_dest = new ArrayList<>();
-            typetransition_src = new ArrayList<>();
-            typeattribute = new ArrayList<>();
             typebounds = new HashMap<>();
+            typetransition = new ArrayList<>();
+            typeattribute = new ArrayList<>();
             typeattributeset = new HashMap<>();
-            avrule_src = new HashSet<>();
-            avrule_tgt = new HashSet<>();
-            macros = new HashMap<>();
-            tmpfs_types = new ArrayList<>();
-            file_types = new ArrayList<>();
-            domain_types = new ArrayList<>();
-        }
-
-        private class Node {
-
-            protected NonTerminal parent;
-
-            private Node(NonTerminal parent) {
-                this.parent = parent;
-            }
-        }
-
-        private class NonTerminal extends Node {
-
-            private List<Node> children;
-
-            private NonTerminal(NonTerminal parent) {
-                super(parent);
-                children = new ArrayList<>();
-            }
-        }
-
-        private class Terminal extends Node {
-            private String data;
-
-            private Terminal(NonTerminal parent, String data) {
-                super(parent);
-                this.data = data;
-            }
+            avrule_src = new HashSet<>();   // to avoid slowing down on duplicates
+            avrule_tgt = new HashSet<>();   // to avoid slowing down on duplicates
         }
 
         private void addNonTerminal() {
@@ -157,15 +103,12 @@ public class PolicyParser {
 
         public boolean isCompliant(String pkgName) {
 
-            // check the policy to be wrapped in a block statement
             if(!blockWrapped())
                 return false;
 
-            // parse the content of the sepolicy file
             if(!treeWalk(root))
                 return false;
 
-            // print the statements listed in the sepolicy file
             if (DEBUG_SEPOLICY) {
                 Slog.d(TAG, "POLICY WRAPPED INTO BLOCK WITH NAMESPACE: " + namespace);
                 Slog.d(TAG, "TYPES DECLARED");
@@ -184,7 +127,7 @@ public class PolicyParser {
                     Slog.d(TAG, sb.toString());
                 }
                 Slog.d(TAG, "TYPETRANSITION DECLARED");
-                for (String dest : typetransition_dest)
+                for (String dest : typetransition)
                     Slog.d(TAG, dest);
                 Slog.d(TAG, "TYPEATTRIBUTE DECLARED");
                 for (String typeattribute : typeattribute)
@@ -204,62 +147,31 @@ public class PolicyParser {
                 Slog.d(TAG, "TYPES USED IN ALLOW STMT AS SRC");
                 for (String type : avrule_src)
                     Slog.d(TAG, type);
+
                 Slog.d(TAG, "TYPES USED IN ALLOW STMT AS TGT");
                 for (String type : avrule_tgt)
                     Slog.d(TAG, type);
-                Slog.d(TAG, "TYPES USED IN CALL TO MACROS");
-                for (String macro : macros.keySet()) {
-                    StringBuilder sb = new StringBuilder(macro);
-                    sb.append(": ");
-                    ArrayList<String> set = macros.get(macro);
-                    for (String type : set) {
-                        sb.append(type);
-                        sb.append(", ");
-                    }
-                    sb.delete(sb.lastIndexOf(","), sb.length());
-                    Slog.d(TAG, sb.toString());
-                }
             }
 
-            /**
-             *  The following ensures the policy to be compliant to the SEApp restrictions.
-             *  Please note that the policy will also be compiled by secilc, so malformed policies
-             *  will be automatically discarded.
-             **/
-
-            // the policy has to be wrapped in a namespace equal to the app package name
-            // (the . is replaced with _)
-            if (!namespace.equals(pkgName.replace(".","_"))) {
-                if (DEBUG_SEPOLICY)
-                    Slog.d(TAG, "SEApp PolicyParser error: block name not compliant to pkg name");
+            if (!namespace.equals(pkgName.replace(".","_")))
                 return false;
-            }
 
-            // types have to be different to untrusted_app, app_data_file and any other type-attribute.
-            // The the global (i.e., the platform's) untrusted_app and app_data_file will be used
-            // to bound the types defined locally
             for (String type : types)
                 if (type.equals(UNTRUSTED_APP) || type.equals(APP_DATA_FILE)
-                        || typeattribute.contains(type)) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: defined a type equal to one among:" +
-                            " untrusted_app, app_data_file or a type-attribute (" + type + ")");
+                        || typeattribute.contains(type))
                     return false;
-                }
 
-            // type-attributes have to be different to untrusted_app and to app_data_file
-            // (N.B. it may not be required since type-attributes cannot take part in a typebound stmt)
+            // not required as typeattribute cannot take part in a typebounds stmt
             for (String type : typeattribute)
-                if (type.equals(UNTRUSTED_APP) || type.equals(APP_DATA_FILE)) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: defined a type-attribute equal to" +
-                                " one among: untrusted_app or app_data_file (" + type + ")");
+                if (type.equals(UNTRUSTED_APP) || type.equals(APP_DATA_FILE))
                     return false;
-                }
 
-            // get all local types bounded to untrusted_app
-            ArrayList<String> queue = new ArrayList<>(Arrays.asList(UNTRUSTED_APP));
-            bounded_to_untrusted_app = new ArrayList<>();
+            // TODO: resolve typeattributeset once and for all, avoid to hide externally
+            //       defined typeattribute
+
+            // resolve type bounded to untrusted_app/app_data_file
+            ArrayList<String> queue = new ArrayList<>(Arrays.asList(UNTRUSTED_APP, APP_DATA_FILE));
+            ArrayList<String> bounded_to_untrusted_app = new ArrayList<>();
             while (!queue.isEmpty()) {
                 String vertex = queue.get(0);
                 ArrayList<String> neighbors = typebounds.get(vertex);
@@ -274,131 +186,47 @@ public class PolicyParser {
                 queue.remove(0);
             }
 
-            // get all local types bounded to app_data_file
-            queue = new ArrayList<>(Arrays.asList(APP_DATA_FILE));
-            bounded_to_app_data_file = new ArrayList<>();
-            while (!queue.isEmpty()) {
-                String vertex = queue.get(0);
-                ArrayList<String> neighbors = typebounds.get(vertex);
-                if (neighbors != null) {
-                    for (String neighbor : neighbors) {
-                        if (!bounded_to_app_data_file.contains(neighbor)) {
-                            bounded_to_app_data_file.add(neighbor);
-                            queue.add(neighbor);
-                        }
-                    }
-                }
-                queue.remove(0);
-            }
-
-            // all local types have to be bounded to one between app_data_file and untrusted_app
-            for (String type : types)
-                if (! (bounded_to_app_data_file.contains(type) || bounded_to_untrusted_app.contains(type))){
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") is an unbounded" +
-                                " local type");
-                    return false;
-                }
-            // empty intersection
-            for (String type : bounded_to_app_data_file)
-                if (bounded_to_untrusted_app.contains(type)){
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") bounded to " +
-                                " both untrusted_app and app_data_file");
-                    return false;
-                }
-
-            // union of all bounded types
-            ArrayList<String> bounded_union = new ArrayList<>();
-            bounded_union.addAll(bounded_to_app_data_file);
-            bounded_union.addAll(bounded_to_untrusted_app);
-
             if (DEBUG_SEPOLICY) {
-                Slog.d(TAG, "TYPES BOUNDED TO untrusted_app");
+                Slog.d(TAG, "TYPES BOUNDED");
                 for (String type : bounded_to_untrusted_app)
                     Slog.d(TAG, type);
-                Slog.d(TAG, "TYPES BOUNDED TO app_data_file");
-                for (String type : bounded_to_app_data_file)
-                    Slog.d(TAG, type);
             }
 
-            // typeattributeset stmt: all elements in the set that relate to the typeattribute
-            // (which must be defined locally) must be local and bounded
-            // This way, we prevent the platform policy to be modified by implicit propagation of
-            // permission
             for (String typeattr : typeattributeset.keySet()) {
+                // all elements in the set of the global typeattribute must be local and bounded
                 if (!typeattribute.contains(typeattr)) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: the typeattributeset statement" +
-                                " relates to a non-local type-attribute(" + typeattr + ")");
-                    return false;
-                }
-                ArrayList<String> list = typeattributeset.get(typeattr);
-                for (String type : list) {
-                    // the type is local and bounded
-                    boolean left_pred = types.contains(type) && bounded_union.contains(type);
-                    // type is a local type-attribute that relates to local bounded types
-                    boolean right_pred = typeattribute.contains(type) && resolveTypeAttribute(type) != null &&
-                            bounded_union.containsAll(resolveTypeAttribute(type));
-                    if ( !(left_pred || right_pred) ) {
-                        if (DEBUG_SEPOLICY)
-                            Slog.d(TAG, "SEApp PolicyParser error: (" + type + "), " +
-                                    "associated to type-attribute (" + typeattr + "), is not local" +
-                                    " and/or bounded");
-                        return false;
-                        }
+                    ArrayList<String> list = typeattributeset.get(typeattr);
+                    for (String type : list) {
+                        if (!(types.contains(type) && bounded_to_untrusted_app.contains(type)
+                                || typeattribute.contains(type) && resolveTypeAttribute(type) != null
+                                        && bounded_to_untrusted_app.containsAll(resolveTypeAttribute(type))))
+                            return false;
+                    }
                 }
             }
 
-            // all typetransition dest must be local and bounded
-            for (String dest : typetransition_dest) {
-                boolean left_pred = types.contains(dest) && bounded_union.contains(dest);
-                boolean right_pred = typeattribute.contains(dest) && resolveTypeAttribute(dest) != null
-                        && bounded_union.containsAll(resolveTypeAttribute(dest));
-                if (!( left_pred || right_pred )) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + dest + ") is a non local " +
-                                "and/or bounded transition destination type");
+            for (String dest : typetransition) {
+                // all typetransition must be local and bounded with the exception of appdomain_tmpfs
+                if (!(types.contains(dest) && bounded_to_untrusted_app.contains(dest)
+                        || typeattribute.contains(dest) && resolveTypeAttribute(dest) != null
+                            && bounded_to_untrusted_app.containsAll(resolveTypeAttribute(dest))
+                        || dest.equals(APPDOMAIN_TMPFS)))
                     return false;
-                }
             }
 
-            // only typetransition with locally defined source type can be defined
-            for (String src_type: typetransition_src){
-                boolean left_pred = types.contains(src_type) && bounded_union.contains(src_type);
-                boolean right_pred = typeattribute.contains(src_type) && resolveTypeAttribute(src_type) != null
-                        && bounded_union.containsAll(resolveTypeAttribute(src_type));
-                if (! (left_pred || right_pred)){
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + src_type + ") is a non local " +
-                                "and/or bounded source type used in a transition");
-                    return false;
-                }
-            }
-
-            // all avrule_src must be local and bounded (no Allow from system type to local type allowed)
             for (String src : avrule_src) {
-                boolean left_pred = types.contains(src) && bounded_union.contains(src);
-                boolean right_pred = typeattribute.contains(src) && resolveTypeAttribute(src) != null
-                        && bounded_union.containsAll(resolveTypeAttribute(src));
-                if (!( left_pred || right_pred )) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + src + ") is a non local " +
-                                "and/or bounded source avrule type");
+                // all avrule_src must be local and bounded
+                if (!(types.contains(src) && bounded_to_untrusted_app.contains(src)
+                        || typeattribute.contains(src) && resolveTypeAttribute(src) != null
+                                && bounded_to_untrusted_app.containsAll(resolveTypeAttribute(src))))
                     return false;
-                }
             }
 
-            // all avrule_tgt must not be defined by another package
             for (String tgt : avrule_tgt) {
-                if (tgt.contains(".") && !tgt.startsWith(".") && !validGlobalType(tgt)) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + tgt + ") is a non local " +
-                                "defined avrule target type");
+                // all avrule_tgt must not be defined by another package
+                if (tgt.contains(".") && !tgt.startsWith(".") && !validGlobalType(tgt))
                     return false;
-                }
             }
-
             return true;
         }
 
@@ -437,7 +265,6 @@ public class PolicyParser {
 
             if (nt.children.isEmpty() || nt.children.get(0) instanceof NonTerminal)
                 return false;
-
             Terminal key = (Terminal) nt.children.get(0);
 
             if (key.data.equals(CIL_KEY_TYPE)) {
@@ -470,9 +297,7 @@ public class PolicyParser {
                         || nt.children.get(nt.children.size() - 1) instanceof NonTerminal)
                     return false;
                 Terminal dest = (Terminal) nt.children.get(nt.children.size() - 1);
-                typetransition_dest.add(dest.data);
-                Terminal src = (Terminal) nt.children.get(1);
-                typetransition_src.add(src.data);
+                typetransition.add(dest.data);
 
             } else if (key.data.equals(CIL_KEY_TYPEATTRIBUTE)) {
 
@@ -522,66 +347,9 @@ public class PolicyParser {
                     avrule_tgt.add(tgt.data);
                 else
                     avrule_tgt.add(src.data);
-            } else if (key.data.equals(CIL_KEY_CALL)) {
-
-                if (nt.children.size() != 3 || nt.children.get(1) instanceof NonTerminal)
-                    return false;
-                Terminal macro = (Terminal) nt.children.get(1);
-                // check the called macro to be defined
-                if (!SEAPP_MACRO_SUPPORTED.contains(macro.data))
-                    return false;
-                // input parameters must be enclosed in parentheses (it has to be a non-terminal)
-                if (nt.children.get(2) instanceof Terminal)
-                    return false;
-                NonTerminal set = (NonTerminal) nt.children.get(2);
-                //only one parameter allowed in the input list (we assume the developer to user is unaware of )
-                if (set.children.size() != 1 || set.children.get(0) instanceof NonTerminal)
-                    return false;
-                Terminal t = (Terminal) set.children.get(0);
-                // add the input to the macros HashMap
-                if (!macros.containsKey(macro.data)){
-                    ArrayList<String> input_types = new ArrayList<>();
-                    input_types.add(t.data);
-                    macros.put(macro.data, input_types);
-                } else {
-                    ArrayList<String> prev_list = macros.get(macro.data);
-                    prev_list.add(t.data);
-                }
             } else if (CIL_KEY_UNSUPPORTED.contains(key.data)) {
                 return false;
             }
-
-            return true;
-        }
-
-        private boolean postExpansionChecks(){
-            // file types have to be bounded to app_data_file
-            for (String type : file_types)
-                if (bounded_to_untrusted_app.contains(type)) {
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") is a file type" +
-                                " but is bounded to untrusted_app");
-                    return false;
-                }
-            // domain types have to be bounded to untrusted_app
-            for (String type : domain_types)
-                if (bounded_to_app_data_file.contains(type)){
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") is a domain type" +
-                                " but is bounded to app_data_file");
-                    return false;
-                }
-            // only locally defined types can be used in macros call argument input list
-            ArrayList<String> macro_types = new ArrayList<>();
-            macro_types.addAll(file_types);
-            macro_types.addAll(domain_types);
-            for (String type: macro_types)
-                if (!types.contains(type)){
-                    if (DEBUG_SEPOLICY)
-                        Slog.d(TAG, "SEApp PolicyParser error: (" + type + ") is used in the " +
-                                "a call to macro argument list but it is not a localtype");
-                    return false;
-                }
 
             return true;
         }
@@ -596,7 +364,7 @@ public class PolicyParser {
             while (i < ret.size()) {
                 String toSolve = ret.get(i);
                 if (solved.contains(toSolve))
-                    return null; // avoid cycles
+                    return null;
                 if (typeattributeset.containsKey(toSolve)) {
                     solved.add(toSolve);
                     ret.addAll(typeattributeset.get(toSolve));
@@ -608,15 +376,15 @@ public class PolicyParser {
             return ret;
         }
 
-        private boolean validGlobalType(String type) {
-            String localType = getLocalType(type);
-            return (localType != null && types.contains(localType));
-        }
-
         private String getLocalType(String type) {
             if (type != null && type.startsWith(namespace + "."))
                 return type.substring(namespace.length() + 1);
             return null;
+        }
+
+        private boolean validGlobalType(String type) {
+            String localType = getLocalType(type);
+            return (localType != null && types.contains(localType));
         }
 
         public boolean validTypes(ArrayList<String> fcTypes) {
@@ -634,126 +402,34 @@ public class PolicyParser {
             return true;
         }
 
-        /**
-         * This method expands the parse tree of a VALID sepolicy.cil file, it is not safe to invoke
-         * it if the isCompliant method returns false for the current parse tree
-         */
-        public void expander(){
-            // expand the parse tree input argument list and retrieve the custom types to be
-            // added to the parse tree
-            expanderHelper(this.root);
-            // add custom types to the parse tree
-            for (String type : tmpfs_types)
-                addExpandedType(type);
-        }
+        private class Node {
 
-        private void expanderHelper(Node node){
-            if (node == null)
-                return;
-            NonTerminal nt = (NonTerminal) node;
-            if (nt.children.size() != 0 && nt.children.get(0) instanceof Terminal){
-                String statement_type = ((Terminal) nt.children.get(0)).data;
-                if (statement_type.equals(CIL_KEY_CALL)) {
-                    // since we have a compliant macro, it has the expected structure:
-                    // (call macro_name (input_type)), no need to further check it
-                    String macro = ((Terminal) nt.children.get(1)).data;
-                    NonTerminal set;
-                    String new_type;
-                    // check whether it's one of the macros that require expansion
-                    if (SEAPP_MACRO_EXPANDED.contains(macro)) {
-                        set = (NonTerminal) nt.children.get(2);
-                        String old_type = ((Terminal) set.children.get(0)).data;
-                        // get the expanded type to be added to the parse tree
-                        new_type = old_type.concat("_tmpfs");
-                        // add it to the structure that keeps track of the types to be added
-                        tmpfs_types.add(new_type);
-                        domain_types.add(old_type);
-                        if (DEBUG_SEPOLICY)
-                            Slog.d(TAG, "Custom type to be added to the parse tree: " + new_type);
-                        // manage the expansion to the macro-call argument list
-                        set.children.add(new Terminal(set, new_type));
-                    } else if (macro.equals("mt_appdatafile")){
-                        set = (NonTerminal) nt.children.get(2);
-                        String f_type = ((Terminal) set.children.get(0)).data;
-                        file_types.add(f_type);
-                    }
+            protected NonTerminal parent;
 
-
-                }
+            private Node(NonTerminal parent) {
+                this.parent = parent;
             }
-            for (Node n : nt.children)
-                if (n instanceof NonTerminal)
-                    expanderHelper(n);
         }
 
-        private void addExpandedType(String expandedType){
-            // go down to the level to which the new type's S-expr declaration is added
-            NonTerminal declarations_level = (NonTerminal) this.root.children.get(0);
+        private class NonTerminal extends Node {
 
-            // build the custom type non-terminal
-            NonTerminal et_declaration = new NonTerminal(declarations_level);
-            et_declaration.children.add(new Terminal(et_declaration, CIL_KEY_TYPE));
-            et_declaration.children.add(new Terminal(et_declaration, expandedType));
+            private List<Node> children;
 
-            // nest the non-terminal to the tree (position 2 means: immediately after the block name
-            // declaration, before any other policy declaration inside the block)
-            declarations_level.children.add(2, et_declaration);
-        }
-
-        public void serializer(StringBuilder sb) {
-            serializerHelper(sb, this.root);
-        }
-
-        private void serializerHelper(StringBuilder sb, Node node) {
-            if (node == null)
-                return;
-            NonTerminal nt = (NonTerminal) node;
-            // flags
-            boolean closing_Level = false;
-            boolean block_level = false;
-            if (nt.children.size() != 0 && !(nt.children.get(0) instanceof NonTerminal)) {
-                String ctype = ((Terminal) nt.children.get(0)).data;
-                if (ctype.equals(CIL_KEY_CALL) ||
-                        ctype.equals(CIL_KEY_TYPE) ||
-                        CIL_KEY_AVRULES.contains(ctype) ||
-                        ctype.equals(CIL_KEY_TYPEBOUNDS) ||
-                        ctype.equals(CIL_KEY_TYPEATTRIBUTE) ||
-                        ctype.equals(CIL_KEY_TYPETRANSITION) ||
-                        ctype.equals(CIL_KEY_TYPEATTRIBUTESET))
-                    closing_Level = true;
-                else if (ctype.equals(CIL_KEY_BLOCK))
-                    block_level = true;
+            private NonTerminal(NonTerminal parent) {
+                super(parent);
+                children = new ArrayList<>();
             }
-            if (block_level)
-                sb.append("(");
-            // append non-terminals
-            boolean not_first_element = false;
-            for (Node n : nt.children) {
-                if (n instanceof Terminal) {
-                    Terminal current = (Terminal) n;
-                    if (!block_level && !not_first_element)
-                        if (closing_Level)
-                            sb.append("\t(");
-                        else
-                            sb.append(" (");
-                    if (not_first_element)
-                        sb.append(" ");
-                    sb.append(current.data);
-                    not_first_element = true;
-                }
-                else {
-                    if (block_level)
-                        sb.append("\n");
-                    serializerHelper(sb, n);
-                }
-            }
-            if (block_level)
-                sb.append("\n");
-            if (node != this.root)
-                sb.append(")");
-            if (closing_Level || block_level)
-                sb.append("\n");
         }
+
+        private class Terminal extends Node {
+            private String data;
+
+            private Terminal(NonTerminal parent, String data) {
+                super(parent);
+                this.data = data;
+            }
+        }
+
     }
 
     public static ParseTree parse(List<Token> tokens) {
@@ -789,29 +465,6 @@ public class PolicyParser {
         }
 
         return parseTree;
-    }
-
-    /**
-     * This method expands the parse tree. By doing this, we support the propagation of untrusted_app domain
-     * permission to types introduced by the developer keeping the knowledge of the platform policy to a minimum.
-     * @param parseTree The parse tree to be modified
-     */
-    public static boolean expandAST(PolicyParser.ParseTree parseTree){
-        parseTree.expander();
-        return parseTree.postExpansionChecks();
-    }
-
-    /**
-     * This method produces a string representation of the parse tree
-     * @param parseTree The parse tree to be printed
-     * @return The string representation of the parse tree
-     */
-    public static StringBuilder serializeAST(PolicyParser.ParseTree parseTree){
-        StringBuilder sb = new StringBuilder(1000);
-        parseTree.serializer(sb);
-        if (DEBUG_SEPOLICY)
-            Slog.d(TAG, "EXPANDED SEPOLICY.CIL: \n" + sb.toString());
-        return sb;
     }
 
 }

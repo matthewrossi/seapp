@@ -1,3 +1,0 @@
-typeattribute restoreconservice coredomain;
-
-init_daemon_domain(restoreconservice)

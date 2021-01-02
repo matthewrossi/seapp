@@ -7,16 +7,17 @@ init_daemon_domain(zygote)
 read_runtime_log_tags(zygote)
 
 # Override DAC on files and switch uid/gid.
-allow zygote self:global_capability_class_set { dac_override setgid setuid fowner chown };
+allow zygote self:global_capability_class_set { dac_override dac_read_search setgid setuid fowner chown };
 
 # Drop capabilities from bounding set.
 allow zygote self:global_capability_class_set setpcap;
 
 # Switch SELinux context to app domains.
 allow zygote self:process setcurrent;
-allow zygote system_server:process dyntransition;
+allow zygote system_server_startup:process dyntransition;
 allow zygote appdomain:process dyntransition;
 allow zygote webview_zygote:process dyntransition;
+allow zygote app_zygote:process dyntransition;
 
 # Allow zygote to read app /proc/pid dirs (b/10455872).
 allow zygote appdomain:dir { getattr search };
@@ -26,6 +27,7 @@ allow zygote appdomain:file { r_file_perms };
 allow zygote system_server:process { getpgid setpgid };
 allow zygote appdomain:process { getpgid setpgid };
 allow zygote webview_zygote:process { getpgid setpgid };
+allow zygote app_zygote:process { getpgid setpgid };
 
 # Read system data.
 allow zygote system_data_file:dir r_dir_perms;
@@ -46,9 +48,13 @@ allow zygote dalvikcache_data_file:lnk_file create_file_perms;
 allow zygote resourcecache_data_file:dir rw_dir_perms;
 allow zygote resourcecache_data_file:file create_file_perms;
 
-# When WITH_DEXPREOPT is true, the zygote does not load executable content from
-# /data/dalvik-cache.
-allow { zygote with_dexpreopt(`-zygote') } dalvikcache_data_file:file execute;
+# For updateability, the zygote may fetch the current boot
+# classpath from the dalvik cache. Integrity of the files
+# is ensured by fsverity protection (checked in art_apex_boot_integrity).
+allow zygote dalvikcache_data_file:file execute;
+
+# Allow zygote to create JIT memory.
+allow zygote self:process execmem;
 
 # Execute idmap and dex2oat within zygote's own domain.
 # TODO:  Should either of these be transitioned to the same domain
@@ -88,22 +94,36 @@ allow zygote fuse:filesystem { unmount };
 allow zygote sdcardfs:filesystem { unmount };
 
 # Allow creating user-specific storage source if started before vold.
-allow zygote mnt_user_file:dir create_dir_perms;
+allow zygote mnt_user_file:dir { create_dir_perms mounton };
 allow zygote mnt_user_file:lnk_file create_file_perms;
+allow zygote mnt_user_file:file create_file_perms;
 # Allowed to mount user-specific storage into place
 allow zygote storage_file:dir { search mounton };
+
+# Allow mounting and creating files, dirs on sdcardfs.
+# TODO: reduce this back to only sdcardfs once b/123533205 is root-caused
+# (Technically "sdcardfs" and "media_rw_data_file" are equivalent, since
+# sdcardfs simply wraps files stored under /data/media.)
+allow zygote { sdcard_type media_rw_data_file }:dir { create_dir_perms mounton };
+allow zygote { sdcard_type media_rw_data_file }:file { create_file_perms };
+
+# Allow zygote to expand app files while preloading libraries
+allow zygote mnt_expand_file:dir getattr;
 
 # Handle --invoke-with command when launching Zygote with a wrapper command.
 allow zygote zygote_exec:file rx_file_perms;
 
-# Read access to pseudo filesystems.
-r_dir_file(zygote, proc_net)
+# Allow zygote to write to statsd.
+unix_socket_send(zygote, statsdw, statsd)
 
 # Root fs.
 r_dir_file(zygote, rootfs)
 
 # System file accesses.
 r_dir_file(zygote, system_file)
+
+# /oem accesses.
+allow zygote oemfs:dir search;
 
 userdebug_or_eng(`
   # Allow zygote to create and write method traces in /data/misc/trace.
@@ -114,9 +134,18 @@ userdebug_or_eng(`
 allow zygote ion_device:chr_file r_file_perms;
 allow zygote tmpfs:dir r_dir_perms;
 
+allow zygote same_process_hal_file:file { execute read open getattr map };
+
 # Let the zygote access overlays so it can initialize the AssetManager.
 get_prop(zygote, overlay_prop)
 get_prop(zygote, exported_overlay_prop)
+
+# Allow the zygote to access the runtime feature flag properties.
+get_prop(zygote, device_config_runtime_native_prop)
+get_prop(zygote, device_config_runtime_native_boot_prop)
+
+# ingore spurious denials
+dontaudit zygote self:global_capability_class_set sys_resource;
 
 ###
 ### neverallow rules
@@ -127,8 +156,14 @@ get_prop(zygote, exported_overlay_prop)
 # written on appdomain are applied to all app processes.
 # This is achieved by ensuring that it is impossible for zygote to
 # setcon (dyntransition) to any types other than those associated
-# with appdomain plus system_server and webview_zygote.
-neverallow zygote ~{ appdomain system_server webview_zygote }:process dyntransition;
+# with appdomain plus system_server_startup, webview_zygote and
+# app_zygote.
+neverallow zygote ~{
+  appdomain
+  system_server_startup
+  webview_zygote
+  app_zygote
+}:process dyntransition;
 
 # Zygote should never execute anything from /data except for /data/dalvik-cache files.
 neverallow zygote {
@@ -139,6 +174,7 @@ neverallow zygote {
 # Do not allow access to Bluetooth-related system properties and files
 neverallow zygote {
   bluetooth_a2dp_offload_prop
+  bluetooth_audio_hal_prop
   bluetooth_prop
   exported_bluetooth_prop
 }:file create_file_perms;

@@ -1,0 +1,25 @@
+# secilc
+type secilc, domain;
+type secilc_exec, system_file_type, exec_type, file_type;
+
+allow secilc init:fifo_file write;  # (not required)
+
+allow secilc installd:fd use;
+allow secilc installd:fifo_file write;  # (not required)
+
+# secilc uses bootstrap bionic (not required)
+allow secilc system_bootstrap_lib_file:dir r_dir_perms;
+allow secilc system_bootstrap_lib_file:file { execute read open getattr map };
+
+# Allow secilc to write the built policy
+allow secilc cache_file:dir r_dir_perms;
+allow secilc self:capability { dac_read_search dac_override };
+allow secilc cache_selinux_file:dir r_dir_perms;
+allow secilc cache_selinux_file:file rw_file_perms;
+
+# Allow secilc to access plat_sepolicy.cil
+allow secilc sepolicy_file:file r_file_perms;
+
+# Allow secilc to read /data/selinux/*/sepolicy.cil
+allow secilc selinux_data_file:dir r_dir_perms;
+allow secilc selinux_data_file:file r_file_perms;
