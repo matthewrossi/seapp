@@ -74,3 +74,4 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 - Android 8.1 ([branch](https://github.com/matthewrossi/seapp/tree/android-8.1.0))
 - Android 9 ([branch](https://github.com/matthewrossi/seapp/tree/android-9.0.0))
+- Android 10 ([branch](https://github.com/matthewrossi/seapp/tree/android-10.0.0))
