@@ -1,41 +1,46 @@
 (block com_example_sepolicytestapp
 
+	;creation of domain types
 	(type init)
 	(call md_untrusteddomain (init))
 	(type unclassified)
 	(call md_appdomain (unclassified))
 	(type top_secret)
 	(call md_appdomain (top_secret))
+	
+	(typeattribute domains)
+	(typeattributeset domains (init unclassified top_secret))
 
+	;creation of file types
 	(type unclassified_file)
 	(call mt_appdatafile (unclassified_file))
 	(type top_secret_file)
-	(call mt_appdatafile (top_secret_file))	
-
+	(call mt_appdatafile (top_secret_file))
+	
+	;bounding the domains
 	(typebounds untrusted_app init)
 	(typebounds untrusted_app top_secret)
 	(typebounds untrusted_app unclassified)
 
+	;bounding file types
 	(typebounds app_data_file top_secret_file)
 	(typebounds app_data_file unclassified_file)
 
-	(typeattribute domains)
-	(typeattributeset domains (init unclassified top_secret))
 
-	;subset of app_api_service
+	;minimum subset of app_api_service permissions required to run the test app
 	(allow domains activity_service (service_manager (find)))
 	(allow domains display_service (service_manager (find)))
-	(allow domains connectivity_service (service_manager (find)))
 	(allow domains uimode_service (service_manager (find)))
 	(allow domains accessibility_service (service_manager (find)))
 	(allow domains input_method_service (service_manager (find)))
-	(allow domains graphicsstats_service (service_manager (find)))
 	(allow domains input_service (service_manager (find)))
 	(allow domains audio_service (service_manager (find)))
-
 	(allow domains surfaceflinger_service (service_manager (find)))
+
+	;permissions to use the new file creation service
 	(allow domains restorecon_service (service_manager (find)))
-	
+
+	;example of policy to access files
 	(allow unclassified unclassified_file (file (read)))
 	(allow top_secret unclassified_file (file (read)))
 	(allow top_secret top_secret_file (file (read)))
