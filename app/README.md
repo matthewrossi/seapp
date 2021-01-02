@@ -25,7 +25,7 @@ been selected for the representation of an app policy module.
 The syntax is shortly shown in the following picture.
 
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/15113769/94329703-a75ccc80-ffbd-11ea-9d89-2412d3ddf149.png"
+    <img src="https://user-images.githubusercontent.com/15113769/103461506-2b41f580-4d1f-11eb-9525-cc01b2fa3417.png"
         alt="Application policy module CIL syntax">
 </p>
 
@@ -64,9 +64,14 @@ Here are the emerging cases and how they are constrained:
 modification
 
 - _AllowSA_ is prohibited, as it might change system services security
-assumptions, however indirect assignment through the use of `typeattributeset`
+assumptions, however indirect assignment by calling our macros
 is available to permit system services necessary to the functioning of apps to
-work as intended by the system policy
+work as intended by the system policy. The list of available macros follows:
+  - _md_appdomain_: to label app domains
+  - _md_bluetoothdomain_: to access bluetooth
+  - _md_netdomain_: to access network
+  - _md_unstrusteddomain_: to get full unstrusted app permissions
+  - _mt_appdatafile_: to label app files
 
 - _AllowAS_ cannot be enstablished as it is, therefore it is delegated to the
 SELinux decision engine during policy enforcement.
