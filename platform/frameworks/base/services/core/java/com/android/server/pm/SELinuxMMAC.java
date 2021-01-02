@@ -233,7 +233,7 @@ public final class SELinuxMMAC {
     public static boolean addInstallPolicy(String pkgName) {
         synchronized (sPolicies) {
             if (!sPolicyRead) {
-                Slog.w(TAG, "Initialization has to be done first");
+                Slog.e(TAG, "Initialization has to be done first");
                 return false;
             }
         }
@@ -272,10 +272,10 @@ public final class SELinuxMMAC {
             sb.append(macPermission);
             sb.append(":");
             sb.append(ex);
-            Slog.w(TAG, sb.toString());
+            Slog.e(TAG, sb.toString());
             return false;
         } catch (IOException ioe) {
-            Slog.w(TAG, "Exception parsing " + macPermission, ioe);
+            Slog.e(TAG, "Exception parsing " + macPermission, ioe);
             return false;
         } finally {
             IoUtils.closeQuietly(policyFile);
@@ -288,7 +288,7 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             if (policySort.foundDuplicate()) {
                 sPolicies.remove(newPolicy);
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
+                Slog.e(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
                 return false;
             }
 
@@ -329,6 +329,7 @@ public final class SELinuxMMAC {
             }
 
             for (int i = 0; i < sPolicies.size(); ++i) {
+                // TODO: handle null pointer exception properly
                 String policyPkgName = sPolicies.get(i).getPackageName();
                 if (pkgName.equals(policyPkgName)) {
                     sPolicies.remove(i);
@@ -464,18 +465,14 @@ public final class SELinuxMMAC {
      *
      * @param macPermission a File object of the mac_permissions.xml file in the SEApp
      *         policy module.
+     * @param pkg the apk to check given as a PackageParser.Package object
      * @return String indicating if policy is valid. A value of false
      *         typically indicates a structural problem with the xml or incorrectly
      *         constructed policy stanzas.
      */
-    public static String getSeInfo(File macPermission) {
-
-        String path = macPermission.getAbsolutePath();
-        int start = DATA_SELINUX_PREFIX.length();
-        int end = path.indexOf("/mac_permissions.xml");
-        String pkgName = path.substring(start, end);
-
+    public static String getSeInfo(File macPermission, PackageParser.Package pkg) {
         boolean foundSigner = false;
+
         Policy policy = null;
         FileReader policyFile = null;
         XmlPullParser parser = Xml.newPullParser();
@@ -494,14 +491,12 @@ public final class SELinuxMMAC {
 
                 switch (parser.getName()) {
                     case "signer":
-                        if (!foundSigner) {
-                            policy = readSignerOrThrow(parser, pkgName);
-                            foundSigner = true;
-                        } else {
-                            Slog.w(TAG, "Exception parsing " + macPermission
-                                    + " multiple signers definition");
+                        if (foundSigner) {
+                            Slog.e(TAG, "Invalid mac_permissions.xml: multiple signer tags");
                             return null;
                         }
+                        policy = readSignerOrThrow(parser, pkg.packageName);
+                        foundSigner = true;
                         break;
                     default:
                         skip(parser);
@@ -515,23 +510,17 @@ public final class SELinuxMMAC {
             sb.append(macPermission);
             sb.append(":");
             sb.append(ex);
-            Slog.w(TAG, sb.toString());
+            Slog.e(TAG, sb.toString());
             return null;
         } catch (IOException ioe) {
-            Slog.w(TAG, "Exception parsing " + macPermission, ioe);
+            Slog.e(TAG, "Exception parsing " + macPermission, ioe);
             return null;
         } finally {
             IoUtils.closeQuietly(policyFile);
         }
 
         if (!foundSigner) {
-            Slog.w(TAG, "ERROR! " + pkgName + " has an invalid mac_permissions.xml file");
-            return null;
-        }
-
-        Map<String, String> pkgMap = policy.getInnerPackages();
-        if (pkgMap == null || pkgMap.get(pkgName) == null) {
-            Slog.w(TAG, "ERROR! " + pkgName + " has an invalid mac_permissions.xml file");
+            Slog.e(TAG, "Invalid mac_permissions.xml: no signer tag");
             return null;
         }
 
@@ -542,12 +531,12 @@ public final class SELinuxMMAC {
             Collections.sort(sPolicies, policySort);
             sPolicies.remove(policy);
             if (policySort.foundDuplicate()) {
-                Slog.w(TAG, "ERROR! Duplicate entries found parsing sMACPermissionsFiles.xml files");
+                Slog.e(TAG, "ERROR! Duplicate entries found parsing mac_permissions.xml files");
                 return null;
             }
         }
 
-        return pkgMap.get(pkgName);
+        return policy.getMatchedSeInfo(pkg);
     }
 
     /**
