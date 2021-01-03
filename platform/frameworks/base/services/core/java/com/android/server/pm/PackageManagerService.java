@@ -16479,7 +16479,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // Validate mac_permissions.xml
-        String seInfo = SELinuxMMAC.getSeInfo(macPermissionsFile);
+        String seInfo = SELinuxMMAC.getSeInfo(macPermissionsFile, pkg);
         if (seInfo == null) {
             res.setError(INSTALL_FAILED_INTERNAL_ERROR, "mac_permissions is invalid");
             return;
