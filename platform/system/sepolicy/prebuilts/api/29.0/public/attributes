@@ -126,6 +126,9 @@ attribute vndservice_manager_type;
 # i.e. processes that can read up and write down.
 attribute mlstrustedsubject;
 
+# custom_tmpf attribute to extend MLS restrictions to new _tmpfs types
+attribute customtmpfsfile;
+
 # All types that can override MLS restrictions.
 # i.e. files that can be read by lower and written by higher
 attribute mlstrustedobject;
