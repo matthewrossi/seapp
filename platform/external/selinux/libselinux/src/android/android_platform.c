@@ -418,7 +418,6 @@ static struct selabel_handle *fc_sehandle = NULL;
 
 static struct seapp_context **seapp_contexts = NULL;
 static int nspec = 0;
-static bool sepolicyapp = false;
 
 static void free_seapp_contexts(void)
 {
@@ -775,7 +774,6 @@ static char *contexts_dir = NULL;
 
 static void sepolicyapp_context_init(void)
 {
-
     // load /data/selinux/<package_name>/seapp_contexts
     char seapp_contexts_file[strlen(contexts_dir) + strlen(SEAPP_SUFFIX) + 1];
     strcpy(seapp_contexts_file, contexts_dir);
@@ -788,32 +786,7 @@ static void sepolicyapp_context_init(void)
 #if DEBUG
     selinux_log(SELINUX_INFO, "%s: /data/selinux/<package_name>/seapp_contexts loaded.", __FUNCTION__);
 #endif
-
-    // load /data/selinux/<package_name>/file_contexts
-    char pkg_fc_file[strlen(contexts_dir) + strlen(FC_SUFFIX) + 1];
-    strcpy(pkg_fc_file, contexts_dir);
-    strcat(pkg_fc_file, FC_SUFFIX);
-
-    struct selinux_opt fc_opts[2];
-    fc_opts[0].type = SELABEL_OPT_PATH;
-    fc_opts[0].value = pkg_fc_file;
-    fc_opts[1].type = SELABEL_OPT_BASEONLY;
-    fc_opts[1].value = (char *)1;
-
-    fc_sehandle = selabel_open(SELABEL_CTX_FILE, fc_opts, 2);
-    if (!fc_sehandle) {
-        selinux_log(SELINUX_ERROR, "%s: Error getting file context handle (%s)\n",
-                __FUNCTION__, strerror(errno));
-        return;
-    }
-
-#if DEBUG
-    selinux_log(SELINUX_INFO, "%s: /data/selinux/<package_name>/file_contexts loaded.", __FUNCTION__);
-#endif
-
-    sepolicyapp = true;
 }
-
 
 static void seapp_context_init(void)
 {
@@ -1453,59 +1426,42 @@ static int pkgdir_selabel_lookup(const char *pathname,
         if (!secontext)
             goto err;
     } else {
-        if (sepolicyapp) {
 #if DEBUG
-            selinux_log(SELINUX_INFO, "%s: app specific file_contexts already loaded (app).", __FUNCTION__);
+		selinux_log(SELINUX_INFO, "%s: app specific file_contexts not loaded.", __FUNCTION__);
 #endif
-            struct stat sb;
-            if (lstat(fullpath, &sb) < 0) {
-                selinux_log(SELINUX_ERROR, "%s: Error getting information about the file (%s)\n",
-                                    __FUNCTION__, strerror(errno));
-                rc = -1;
-                goto out;
-            }
-            if (selabel_lookup(fc_sehandle, &secontext, pathname, sb.st_mode) < 0) {   // lookup from pkgdir, if *empty* should be /
-                rc = 0;  /* no match, but not an error */
-                goto out;
-            }
-        } else {
+		char pkg_fc_file[strlen(pkg_sepolicy_dir) + strlen(FC_SUFFIX) + 1];
+		strcpy(pkg_fc_file, pkg_sepolicy_dir);
+		strcat(pkg_fc_file, FC_SUFFIX);
+
+		struct selinux_opt fc_opts[2];
+		struct selabel_handle *pkg_fc_sehandle;
+		struct stat sb;
+
+		fc_opts[0].type = SELABEL_OPT_PATH;
+		fc_opts[0].value = pkg_fc_file;
+		fc_opts[1].type = SELABEL_OPT_BASEONLY;
+		fc_opts[1].value = (char *)1;
+
+		pkg_fc_sehandle = selabel_open(SELABEL_CTX_FILE, fc_opts, 2);
+		if (!pkg_fc_sehandle) {
+			selinux_log(SELINUX_ERROR, "%s: Error getting file context handle (%s)\n",
+					__FUNCTION__, strerror(errno));
+			rc = -1;
+			goto out;
+		}
 #if DEBUG
-            selinux_log(SELINUX_INFO, "%s: app specific file_contexts not loaded (system services).", __FUNCTION__);
+		selinux_log(SELINUX_INFO, "%s: Loaded %s's file_contexts\n", __FUNCTION__, pkgname);
 #endif
-            char pkg_fc_file[strlen(pkg_sepolicy_dir) + strlen(FC_SUFFIX) + 1];
-            strcpy(pkg_fc_file, pkg_sepolicy_dir);
-            strcat(pkg_fc_file, FC_SUFFIX);
-
-            struct selinux_opt fc_opts[2];
-            struct selabel_handle *pkg_fc_sehandle;
-            struct stat sb;
-
-            fc_opts[0].type = SELABEL_OPT_PATH;
-            fc_opts[0].value = pkg_fc_file;
-            fc_opts[1].type = SELABEL_OPT_BASEONLY;
-            fc_opts[1].value = (char *)1;
-
-            pkg_fc_sehandle = selabel_open(SELABEL_CTX_FILE, fc_opts, 2);
-            if (!pkg_fc_sehandle) {
-                selinux_log(SELINUX_ERROR, "%s: Error getting file context handle (%s)\n",
-                        __FUNCTION__, strerror(errno));
-                rc = -1;
-                goto out;
-            }
-#if DEBUG
-            selinux_log(SELINUX_INFO, "%s: Loaded %s's file_contexts\n", __FUNCTION__, pkgname);
-#endif
-            if (lstat(fullpath, &sb) < 0) {
-                selinux_log(SELINUX_ERROR, "%s: Error getting information about the file (%s)\n",
-                                    __FUNCTION__, strerror(errno));
-                rc = -1;
-                goto out;
-            }
-            if (selabel_lookup(pkg_fc_sehandle, &secontext, pathname, sb.st_mode) < 0) {   // lookup from pkgdir, if *empty* should be /
-                rc = 0;  /* no match, but not an error */
-                goto out;
-            }
-        }
+		if (lstat(fullpath, &sb) < 0) {
+			selinux_log(SELINUX_ERROR, "%s: Error getting information about the file (%s)\n",
+								__FUNCTION__, strerror(errno));
+			rc = -1;
+			goto out;
+		}
+		if (selabel_lookup(pkg_fc_sehandle, &secontext, pathname, sb.st_mode) < 0) {   // lookup from pkgdir, if *empty* should be /
+			rc = 0;  /* no match, but not an error */
+			goto out;
+		}
     }
 
     if (!strcmp(secontext, *secontextp))
