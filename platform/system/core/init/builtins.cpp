@@ -1322,6 +1322,13 @@ static Result<Success> do_load_policy(const BuiltinArguments& args) {
     if (!odm_policy_cil_file.empty()) {
         compile_args.push_back(odm_policy_cil_file.c_str());
     }
+
+    // target all the macros
+    std::string seapp_macros_policy_cil_file("/system/etc/selinux/seapp_macros_sepolicy_cil_file.cil");
+    LOG(INFO) << "SEApp macros: " << seapp_macros_policy_cil_file;
+    compile_args.push_back(seapp_macros_policy_cil_file.c_str());
+
+    // also target all policy modules
     for (auto const& policy : policies) {
         LOG(INFO) << "3rd-party app: " << policy;
         compile_args.push_back(policy.c_str());

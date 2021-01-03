@@ -17082,6 +17082,9 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new EnhanceFailure(INSTALL_FAILED_INTERNAL_ERROR, "sepolicy.cil is invalid");
         }
 
+        // expand the parse tree and write an expanded version of the sepolicy.cil file
+        postProcessSepolicyFile(pkg, parseTree);
+
         // Validate file_contexts
         ArrayList<String> fcTypes = new ArrayList<>();
 
@@ -17147,6 +17150,40 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new EnhanceFailure(INSTALL_FAILED_INTERNAL_ERROR, "seapp_contexts is invalid");
         }
     }
+
+    private void postProcessSepolicyFile(PackageParser.Package pkg, PolicyParser.ParseTree parseTree)
+            throws EnhanceFailure {
+        // expand the parse tree
+        if (!PolicyParser.expandAST(parseTree)){
+            throw new EnhanceFailure(INSTALL_FAILED_INTERNAL_ERROR, "sepolicy.cil is invalid");
+        }
+        // the file to which the app policy wll be stored after macro expansion
+        File policyFile = new File(Environment.getDataDirectory() + "/selinux/"
+                + pkg.packageName + "/sepolicy.cil");
+        try {
+            // remove previous (unexpanded) file
+            if (policyFile.exists())
+                policyFile.delete();
+            policyFile.createNewFile();    // N.B. will be removed with the whole package on error
+            Os.chmod(policyFile.getAbsolutePath(), 0644);
+        } catch (Exception e) {
+            throw new EnhanceFailure(INSTALL_FAILED_INTERNAL_ERROR, "Failed to create the expanded sepolicy.cil file");
+        }
+
+        // build a string representation of the sepolicy parse tree
+        StringBuilder sb = PolicyParser.serializeAST(parseTree);
+
+        try (
+                BufferedWriter os = new BufferedWriter(new FileWriter(policyFile));
+        ){
+            os.write(sb.toString()); // write the string representation to the sepolicy file
+            os.newLine();
+        } catch (IOException e) {
+            throw new EnhanceFailure(INSTALL_FAILED_INTERNAL_ERROR, "Failed to create the expanded sepolicy.cil file");
+        }
+
+    }
+
 
     private void updateFileContexts(String packageName, int appId, int userId)
             throws EnhanceFailure {
