@@ -2708,35 +2708,6 @@ std::vector<std::string> get3rdParty(const char *filename) {
     return policies;
 }
 
-int selinux_android_load_policy_from_fd(int fd, const char *description)
-{
-	int rc;
-	struct stat sb;
-	void *map = NULL;
-
-	//set_selinuxmnt(SELINUXMNT);
-	if (fstat(fd, &sb) < 0) {
-		PLOG(ERROR) << "SELinux:  Could not stat " << description << ":  " << strerror(errno) << "\n";
-		return -1;
-	}
-	map = mmap(NULL, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-	if (map == MAP_FAILED) {
-		PLOG(ERROR) << "SELinux:  Could not map " << description << ":  " << strerror(errno) << "\n";
-		return -1;
-	}
-
-	rc = security_load_policy(map, sb.st_size);
-	if (rc < 0) {
-		PLOG(ERROR) << "SELinux:  Could not load policy:  " << strerror(errno) << "\n";
-		munmap(map, sb.st_size);
-		return -1;
-	}
-
-	munmap(map, sb.st_size);
-	LOG(INFO) << "SELinux: Loaded policy from " << description << "\n";
-	return 0;
-}
-
 // Forks, executes the provided program in the child, and waits for the completion in the parent.
 // Child's stderr is captured and logged using LOG(ERROR).
 bool ForkExecveAndWaitForCompletion(const char* filename, char* const argv[]) {
