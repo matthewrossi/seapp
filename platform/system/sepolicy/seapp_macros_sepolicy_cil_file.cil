@@ -8,7 +8,8 @@
        (typeattributeset appdomain (SRC_INT_T))
 
        (typetransition SRC_INT_T tmpfs file DST_INT_T)
-       (allow SRC_INT_T DST_INT_T (file (read execute)))
+       (allow SRC_INT_T DST_INT_T (file (read write getattr map execute)))
+       (allow SRC_INT_T tmpfs (dir (getattr search)))       
        )
        
 (macro md_netdomain ((type SRC_INT_T))
