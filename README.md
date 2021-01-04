@@ -69,6 +69,8 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 - Pixel 2 XL ([binaries](https://developers.google.com/android/drivers#taimenqq3a.200805.001))
 - Pixel 3 ([binaries](https://developers.google.com/android/drivers#bluelineqq3a.200805.001))
+- Emulator ([building AVD images](https://source.android.com/setup/create/avd#building_avd_images)). We recommend to enable CPU virtualization extensions and the product `sdk_phone_x86_64`
+
 
 ## Supported Android versions
 
