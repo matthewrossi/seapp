@@ -451,7 +451,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final boolean DEBUG_ABI_SELECTION = false;
     private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_APP_DATA = false;
-    private static final boolean DEBUG_SEPOLICY = false;
+    private static final boolean DEBUG_SEPOLICY = true;
 
     /** REMOVE. According to Svet, this was only used to reset permissions during development. */
     static final boolean CLEAR_RUNTIME_PERMISSIONS_ON_UPGRADE = false;
@@ -17194,8 +17194,11 @@ public class PackageManagerService extends IPackageManager.Stub
 
         appId = appId - Process.FIRST_APPLICATION_UID;
 
-        Slog.d(TAG, "appId: " + String.valueOf(appId));
-        Slog.d(TAG, "userId: " + String.valueOf(userId));
+        if (DEBUG_SEPOLICY) {
+            Slog.d(TAG, "Rewriting file_contexts with security categories");
+            Slog.d(TAG, "appId: " + String.valueOf(appId));
+            Slog.d(TAG, "userId: " + String.valueOf(userId));
+        }
 
         try {
             if (newFile.exists()) {
@@ -17382,10 +17385,12 @@ public class PackageManagerService extends IPackageManager.Stub
                                         sharedLibLatestVersionSetting);
                             }
                         }
-                        // TODO: Add support to multiple users
-                        final int appId = result.pkgSetting.appId;
-                        final int userId = 0;
-                        updateFileContexts(packageName, appId, userId);
+                        if (hasSEPolicy(pkg)) {
+                            // TODO: Add support to multiple users
+                            final int appId = result.pkgSetting.appId;
+                            final int userId = 0;
+                            updateFileContexts(packageName, appId, userId);
+                        }
                     }
                 } catch (PackageManagerException e) {
                     request.installResult.setError("Scanning Failed.", e);
