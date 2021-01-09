@@ -10,6 +10,10 @@ import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Class[] classes = {
+            UseCase1Activity.class, UseCase2Activity.class, UseCase3Activity.class
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -19,18 +23,8 @@ public class MainActivity extends AppCompatActivity {
     public void goToUseCase(View view) {
         Button clickedButton = (Button) view;
         String text = clickedButton.getText().toString();
-        Intent toUseCase = null;
-        switch(text.charAt(text.indexOf("#") + 1)) {
-            case '1':
-                toUseCase = new Intent(MainActivity.this, UseCase1Activity.class);
-                break;
-            case '2':
-                toUseCase = new Intent(MainActivity.this, UseCase2Activity.class);
-                break;
-            case '3':
-                toUseCase = new Intent(MainActivity.this, UseCase3Activity.class);
-                break;
-        }
+        int idx = Character.getNumericValue(text.charAt(text.indexOf("#") + 1)) - 1;
+        Intent toUseCase = new Intent(MainActivity.this, classes[idx]);
         startActivity(toUseCase);
     }
 }
