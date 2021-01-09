@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">ShowcaseApp</string>
+    <string name="use_case_1_button">"Use case #1\nFine-granularity in access to files"</string>
+    <string name="use_case_2_button">
+        "Use case #2\nFine-granularity in access to services"
+    </string>
+    <string name="use_case_3_button">
+        "Use case #3\nIsolation of vulnerability prone components"
+    </string>
+    <string name="use_case_1_activity_title">Use case #1 — File</string>
+    <string name="use_case_2_activity_title">Use case #2 — Services</string>
+    <string name="use_case_3_activity_title">Use case #3 — Isolation</string>
+</resources>
