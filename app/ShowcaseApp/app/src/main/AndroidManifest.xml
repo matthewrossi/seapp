@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.showcaseapp">
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,7 +17,8 @@
             android:label="@string/use_case_2_activity_title"/>
         <activity android:name=".UseCase3Activity"
             android:label="@string/use_case_3_activity_title"/>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:process=":core_logic_d">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
