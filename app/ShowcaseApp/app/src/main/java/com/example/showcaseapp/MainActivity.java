@@ -20,6 +20,9 @@ import android.widget.TextView;
 public class MainActivity extends AppCompatActivity {
 
     private static final int APP_PERMISSION_REQUEST_LOCATION = 1;
+    private Class[] classes = {
+            UseCase1Activity.class, UseCase2Activity.class, UseCase3Activity.class
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,29 +35,16 @@ public class MainActivity extends AppCompatActivity {
     public void goToUseCase(View view) {
         Button clickedButton = (Button) view;
         String text = clickedButton.getText().toString();
-        Intent toUseCase = null;
-        switch(text.charAt(text.indexOf("#") + 1)) {
-            case '1':
-                toUseCase = new Intent(MainActivity.this, UseCase1Activity.class);
-                break;
-            case '2':
-                /**
-                 * proves that UseCase2Actrivity (acting as a ads_d) can read the current location
-                 * only in case SEApp security checks are not enforced
-                 */
-                if (!hasLocationPermission()) {
-                    showAdvice();
-                    toUseCase = null;
-                }
-                else
-                    toUseCase = new Intent(MainActivity.this, UseCase2Activity.class);
-                break;
-            case '3':
-                toUseCase = new Intent(MainActivity.this, UseCase3Activity.class);
-                break;
-        }
-        if (toUseCase != null)
+        int idx = Character.getNumericValue(text.charAt(text.indexOf("#") + 1)) - 1;
+        if (idx == 1)
+            if (!hasLocationPermission()) {
+                showAdvice();
+                idx = -1;
+            }
+        if (idx >= 0) {
+            Intent toUseCase = new Intent(MainActivity.this, classes[idx]);
             startActivity(toUseCase);
+        }
     }
 
     public boolean hasLocationPermission(){
@@ -92,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                     if (ContextCompat.checkSelfPermission(this,
                             Manifest.permission.ACCESS_FINE_LOCATION)
                             == PackageManager.PERMISSION_GRANTED) {
-                        // here location updates could be requested ...
+                        // if something else has to be done with the position ...
                     }
 
                 } else {
