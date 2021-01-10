@@ -1,0 +1,44 @@
+(block com_example_showcaseapp
+
+	;creation of domain types
+	(type core_logic_d)
+	(call md_untrusteddomain (core_logic_d))
+
+	(type ads_d)
+	(call md_appdomain (ads_d))
+	(call md_netdomain (ads_d))
+
+	(typeattribute domains)
+	(typeattributeset domains (core_logic_d ads_d))
+
+	;creation of file types
+
+	;bounding the domains
+	(typebounds untrusted_app core_logic_d)
+	(typebounds untrusted_app ads_d)
+
+	;bounding file types
+
+	;minimum subset of app_api_service permissions required to run the test app
+	(allow domains activity_service (service_manager (find)))
+	(allow domains display_service (service_manager (find)))
+	(allow domains uimode_service (service_manager (find)))
+	(allow domains accessibility_service (service_manager (find)))
+	(allow domains input_method_service (service_manager (find)))
+	(allow domains input_service (service_manager (find)))
+	(allow domains audio_service (service_manager (find)))
+	(allow domains surfaceflinger_service (service_manager (find)))
+
+	;grant core_logic_d access to the location_service
+	(allow core_logic_d location_service (service_manager (find)))
+
+	;grant ads_d access to the services required by unity3ads
+	(allow ads_d radio_service (service_manager (find)))
+	(allow ads_d webviewupdate_service (service_manager (find)))
+	(allow ads_d autofill_service (service_manager (find)))
+	(allow ads_d clipboard_service (service_manager (find)))
+	(allow ads_d batterystats_service (service_manager (find)))
+	(allow ads_d batteryproperties_service (service_manager (find)))
+	(allow ads_d audioserver_service (service_manager (find)))
+	(allow ads_d mediaserver_service (service_manager (find)))		
+)
