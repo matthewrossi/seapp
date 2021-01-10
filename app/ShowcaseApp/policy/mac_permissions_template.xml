@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <policy>
     <signer signature="insert app signature here">
-        <package name="com.example.sepolicytestapp">
-            <seinfo value="sepolicy_test_app"/>
+        <package name="com.example.showcaseapp">
+            <seinfo value="showcase_app"/>
         </package>
     </signer>
 </policy>
