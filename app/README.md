@@ -29,7 +29,7 @@ The syntax is shortly shown in the following picture.
         alt="Application policy module CIL syntax">
 </p>
 
-For a more detailed explanation we suggest to look at the [CIL documentations](https://android.googlesource.com/platform/external/selinux/+/master/secilc/docs/README.md)
+For a more detailed explanation we suggest to look at the [CIL documentations](https://android.googlesource.com/platform/external/selinux/+/master/secilc/docs/README.md).
 
 ## Policy constraints
 
@@ -60,7 +60,7 @@ Here are the emerging cases and how they are constrained:
         alt="Varieties of allow statements" width="50%">
 </p>
 
-- _AllowSS_ is prohibited, , as it represents a direct platform policy
+- _AllowSS_ is prohibited, as it represents a direct platform policy
 modification
 
 - _AllowSA_ is prohibited, as it might change system services security
@@ -78,11 +78,15 @@ SELinux decision engine during policy enforcement.
 This crucial postponed restriction depends on the constraint that all app types
 have to appear in a `typebounds` statement, which limits the bounded type to
 have at most the access privileges of the bounding type. As Android 10 assigns
-to generic third-party apps the `untrusted_app` domain, this is the candidate we
-use to bound the app types
+to generic third-party apps the `untrusted_app` domain, this is the parent type
+that is used to bound the app types
 
 - _AllowAA_ is always permitted, as it only defines access privileges internal
 to the policy module
+
+A number of other constraints are enforced by the policy module validator. 
+For a more detailed explanation we  suggest to have a look at our paper or to 
+look directly to the policy validator.
 
 ## Policy configuration
 
@@ -116,7 +120,7 @@ user=_app seinfo=cert_id domain=package_name.secret
 name=package.name:secret
 ```
 
-In this example, the two domains unclassified and secret are assigned to the
+In this example, the two domains _unclassified_ and _secret_ are assigned to the
 packageName `:unclassified` and `:secret` processes, respectively.
 In Android developers have to focus on components rather than processes.
 Normally, all components of an application run in a single process.
@@ -142,7 +146,7 @@ file, etc)
 
 The admissible entries are those confined to the app dedicated directory
 and using types defined by the app policy module, with the exception of
-`app_data_file` (useful to enable inter-app file sharing).
+`app_data_file`.
 Due to the regexp support, a path may suit more entries, in which case the most
 specific one is used.
 
