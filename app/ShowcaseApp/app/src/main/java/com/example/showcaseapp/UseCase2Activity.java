@@ -87,7 +87,7 @@ public class UseCase2Activity extends AppCompatActivity {
             public void onLocationChanged(Location location) {
                 location = location;
                 Log.d("Location Changes", location.toString());
-                latitude.setText("GPS Latitude: " + String.valueOf(location.getLatitude()));
+                latitude.setText("GPS latitude: " + String.valueOf(location.getLatitude()));
                 longitude.setText("GPS longitude: " + String.valueOf(location.getLongitude()));
             }
 
