@@ -21,8 +21,8 @@
 
 	;minimum subset of app_api_service permissions required to run the test app
 	(allow domains activity_service (service_manager (find)))
-	(allow domains activity_task_service (service_manager (find))) ;to check
-	(allow domains ashmem_device_service (service_manager (find))) ;to check
+	(allow domains activity_task_service (service_manager (find)))
+	(allow domains ashmem_device_service (service_manager (find)))
 	(allow domains audio_service (service_manager (find)))
 	(allow domains restorecon_service (service_manager (find)))
 	(allow domains surfaceflinger_service (service_manager (find)))
