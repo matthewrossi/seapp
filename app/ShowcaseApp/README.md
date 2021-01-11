@@ -33,7 +33,7 @@ There are some slightly differences between them. Please reference to the specif
 
 In this use case we show how to support the execution of an Ads Library having guarantees that the library cannot abuse the access privileges granted by the
 user to the whole application sandbox. To give you an example, we prevent the library to access some system services sush as the location. 
-In our demonstration we confine the library into an ad-hoc process and show that a malicious component running inside the same process is prevented to access to the
+In our demonstration we confine the library into an ad-hoc process and show that a malicious component running inside the same process is prevented to access to 
 the location service. 
 In this case the malicious component is directly invoked by the library when the show ads routine is executed.
 In our demonstration we used the UnityAds library only as it is a well known non-platform framework; 
