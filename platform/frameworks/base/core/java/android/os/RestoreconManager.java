@@ -81,7 +81,10 @@ public class RestoreconManager {
 
         try{
             mService.restoreFileContext(pathname);
-        } catch (RemoteException ex){
+        } catch (ServiceSpecificException e) {
+            Slog.e("restoreFileContext", "Classic third-party app are not meant to use the RestoreconService");
+            return false;
+        } catch (RemoteException e) {
             Slog.e("restoreFileContext", "Unable to contact the remote RestoreconService");
             return false;
         }
@@ -138,6 +141,9 @@ public class RestoreconManager {
 
         try{
             mService.restoreFileContextRecursive(pathname);
+        } catch (ServiceSpecificException e) {
+            Slog.e("restoreFileContext", "Classic third-party app are not meant to use the RestoreconService");
+            return false;
         } catch (RemoteException ex){
             Slog.e("restoreFileContextRecursive", "Unable to contact the remote RestoreconService");
             return false;
