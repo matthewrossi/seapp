@@ -11,7 +11,7 @@ At a high level perspective, SEApp enables:
 
 
 The Showcase app implements a set of use cases, each of them related to one or more common vulnerability classes.
-We show how that:
+We demonstrate that:
 
 - the Showcase app is perfectly working using a stock version of the system and is thus subject to the vulnerabilities
 
