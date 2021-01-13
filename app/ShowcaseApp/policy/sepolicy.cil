@@ -8,14 +8,18 @@
 	(call md_appdomain (ads_d))
 	(call md_netdomain (ads_d))
 
+	(type media_d)
+	(call md_appdomain (media_d))
+
 	(typeattribute domains)
-	(typeattributeset domains (core_logic_d ads_d))
+	(typeattributeset domains (core_logic_d ads_d media_d))
 
 	;creation of file types
 
 	;bounding the domains
 	(typebounds untrusted_app core_logic_d)
 	(typebounds untrusted_app ads_d)
+	(typebounds untrusted_app media_d)	
 
 	;bounding file types
 
@@ -26,7 +30,8 @@
 	(allow domains audio_service (service_manager (find)))
 	(allow domains restorecon_service (service_manager (find)))
 	(allow domains surfaceflinger_service (service_manager (find)))
-
+	(allow domains gpu_service (service_manager (find)))
+	
 	;grant core_logic_d access to the location_service
 	(allow core_logic_d location_service (service_manager (find)))
 
@@ -38,5 +43,8 @@
 	(allow ads_d batterystats_service (service_manager (find)))
 	(allow ads_d batteryproperties_service (service_manager (find)))
 	(allow ads_d audioserver_service (service_manager (find)))
-	(allow ads_d mediaserver_service (service_manager (find)))		
+	(allow ads_d mediaserver_service (service_manager (find)))
+
+	;grant media_d access to the location_service
+	(allow media_d autofill_service (service_manager (find)))	
 )

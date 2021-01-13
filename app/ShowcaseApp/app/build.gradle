@@ -14,6 +14,15 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            ndkBuild {
+
+
+                //path file('jni/Android.mk')
+                // tell gradle to put output to that path
+                //buildStagingDirectory  "src/main/jniLibs"
+            }
+        }
     }
 
     buildTypes {

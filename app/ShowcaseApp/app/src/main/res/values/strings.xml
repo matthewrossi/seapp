@@ -10,4 +10,5 @@
     <string name="use_case_1_activity_title">Use case #1 — File</string>
     <string name="use_case_2_activity_title">Use case #2 — Services</string>
     <string name="use_case_3_activity_title">Use case #3 — Isolation</string>
+    <string name="media_processor_activity_title">UC #3 - Buggy media</string>
 </resources>

@@ -1,2 +1,3 @@
 user=_app seinfo=showcase_app domain=com_example_showcaseapp.core_logic_d name=com.example.showcaseapp:core_logic_d levelFrom=all
 user=_app seinfo=showcase_app domain=com_example_showcaseapp.ads_d name=com.example.showcaseapp levelFrom=all
+user=_app seinfo=showcase_app domain=com_example_showcaseapp.media_d name=com.example.showcaseapp:media_d levelFrom=all
