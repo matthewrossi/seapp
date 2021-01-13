@@ -60,36 +60,33 @@ public class UseCase3Activity  extends AppCompatActivity {
         if (hasCameraPermission()){
             sb.append("App has camera permission granted\n");
             final CameraManager cameraManager = (CameraManager) getHandleFromJNI("CAMERA_SERVICE");
-            sb.append("The .so library can access the CameraManager via:\n" + cameraManager.toString() + "\n");
+            sb.append("The shared library code can (correctly) access the CameraManager via:\n" +
+                    cameraManager.toString() + "\n");
             dotso_textview.setText(sb.toString());
         }
 
         // show that the .so library can do some computation
-        sb.append("\n\nThe .so can perform some linear algebra, result: " + doSomeAlgebraInJNI(some_numbers) + "\n\n");
+        sb.append("\nThe .so can perform some linear algebra, result: " +
+                doSomeAlgebraInJNI(some_numbers) + "\n\n");
         dotso_textview.setText(sb.toString());
 
-        // show the confinement when policy is active
+        // show the confinement when policy is active (bindProcessToNetwork in the vulnerable media)
         if (hasConnectivityPermission()) {
             sb.append("App has connectivity permission granted\n");
-            final ConnectivityManager connectivityManager = (ConnectivityManager) getHandleFromJNI("CONNECTIVITY_SERVICE");
-            sb.append("The .so library can access the ConnectivityManager via:\n" + connectivityManager.toString() + "\n");
+            final Object[] result = doBindProcessToNetwork("CONNECTIVITY_SERVICE");
+            final ConnectivityManager connectivityManager = (ConnectivityManager) result[0];
+            sb.append("The library code can access the ConnectivityManager via:\n" +
+                    connectivityManager.toString() + "\n");
+            String exits[] = {"The shared library code tries to bindProcessToNetwork: SUCCESS!",
+                    "The shared library code tries to bindProcessToNetwork: " +
+                    "FAILURE!\n(avc: denied {create} for media_d on udp_socket)"};
+            String exitStatus = result[1] != null ? exits[0] : exits[1];
+            sb.append(exitStatus);
             dotso_textview.setText(sb.toString());
-
-            // trying to bind the current process to network
-            boolean bound_to_network = false;
-            for (Network netw : connectivityManager.getAllNetworks()) {
-                bound_to_network = connectivityManager.bindProcessToNetwork(netw);
-                if (bound_to_network)
-                    break;
-            }
-            if (bound_to_network)
-                sb.append("Try bindProcessToNetwork: " + "SUCCESS!");
-            else
-                sb.append("Try bindProcessToNetwork: " + "FAILURE!\n(avc: denied {create} for media_d on udp_socket)");
-            dotso_textview.setText(sb.toString());
-            // clean sb
-            sb = new StringBuilder(100);
         }
+
+        // clean sb
+        sb = new StringBuilder(100);
     }
 
     private boolean hasCameraPermission(){
@@ -111,6 +108,7 @@ public class UseCase3Activity  extends AppCompatActivity {
     }
 
     public native Object getHandleFromJNI(String service_name);
+    public native Object[] doBindProcessToNetwork(String service_name);
 
     public native int doSomeAlgebraInJNI(int[] factors);
 
