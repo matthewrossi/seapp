@@ -21,8 +21,11 @@ To test it, just install the app on with/without the policy module and compare t
 
 ## Prerequisites
 
-To build the apk create the folder `/app/libs` and save into it an unzipped copy of the [UnityAdsLibrary](https://github.com/Unity-Technologies/unity-ads-android/releases/download/3.6.0/UnityAds.aar.zip).
-If you want to equip the Showcase app with the policy module follow the instructions shown [here](../../script).
+UC2 - To build the apk create the folder `/app/libs` and save into it an unzipped copy of the [UnityAdsLibrary](https://github.com/Unity-Technologies/unity-ads-android/releases/download/3.6.0/UnityAds.aar.zip).
+
+UC3 - First you need to install in Android Studio the NDK toolkit. Go to Tools > SDK Manager and ensure you are using the modified SDK. Move to the SDK Tools tab, and install the NDK (Side by side), the Android SDK Command-line Tools and CMake. Restart Android Studio. Then create the folder `/app/src/main/jniLibs`. Open the terminal and go to the folder `$YOUR-PATH-TO-THE-MODIFIED-SKD/ndk/$NDK-VERSION/`. From that location execute the bash command `ndk-build; cp -r ../libs/arm64-v8a ../src/main/jniLibs; cp -r ../libs/x86_64 ../src/main/jniLibs/` to build the `.so` shared library files and move it to the right location. Now you can build the APK with Android Studio.
+
+Injecting the policy module - If you want to equip the Showcase app with the policy module follow the instructions shown [here](../../script).
 
 ## Demo
 
@@ -66,3 +69,8 @@ If you are using the emulator we recommend to send GPS location following these 
 If you are using the emulator you could also connect to it via telnet and then send updates via console. Please keep in mind that
 the emulator is sometimes subject to unexpected behavior; if the showcase app is not retrieving the position correctly, restarting the emulator fixes the problem.
 
+### Use Case 3 - Isolation of media
+
+In this use case we demonstrate how native components, that are relying on shared/static libraries that may be prone to vulnerabilites, can be isolated from the rest of the appliacation. Isolation works again at process level.
+
+We initially create a shared library which is shipped within the application. Then we call the library via JNI. We imagine a scenario in which the shared library is used to process media, so we connect to the camera service (that might be useful for the duty) in the C-side of the code. The shared library returns the handle to the camera service to the current use case activity, and it is then called (again) to carry out some basic algebra computation. Finally, we get to our vulnerability. The rationale is that we don't want shared libraries (that may be subject to memory corruption errors and so on) to be executed in a process that has access to the network. But, access to network state is granted at install time to the whole application sandbox, so the shared library code will still be able to get a reference to the connectivity manager. We demonstrate that access to the network can be restricted in the sepolicy file by using the macros in an easy way. The potentially vulnerable library would still be able to connect to the connectivity service, but when the policy is enforcing, the current process won't be able to bind itself to the network, as SELinux denies the `create` on `udp_socket`.
