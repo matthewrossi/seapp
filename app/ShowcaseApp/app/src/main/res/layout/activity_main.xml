@@ -18,7 +18,7 @@
             android:insetLeft="6dp"
             android:insetRight="6dp"
             android:insetBottom="3dp"
-            android:onClick="goToUseCase"
+            android:onClick="goToUseCase1"
             android:text="@string/use_case_1_button" />
 
         <Button

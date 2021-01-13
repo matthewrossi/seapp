@@ -10,5 +10,9 @@
     <string name="use_case_1_activity_title">Use case #1 — File</string>
     <string name="use_case_2_activity_title">Use case #2 — Services</string>
     <string name="use_case_3_activity_title">Use case #3 — Isolation</string>
-    <string name="media_processor_activity_title">UC #3 - Buggy media</string>
+    <!-- USE CASE #1 -->
+    <string name="err_title">ERROR!</string>
+    <string name="err_files">Can\'t create required files.</string>
+    <string name="err_writing">Can\'t initialize files content.</string>
+    <string name="err_reading">Can\'t read required file.</string>
 </resources>

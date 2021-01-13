@@ -29,11 +29,82 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+        alertDialog.setTitle(getString(R.string.err_title));
+        alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                (dialog, which) -> {
+                    dialog.dismiss();   // prolly not needed
+                    finish();
+                });
+
+        // Create application directory structure
+        File internal = new android.os.File(getFilesDir().getPath(), "internal");
+        File user = new android.os.File(getFilesDir().getPath(), "user");
+        boolean createdInternals = internal.mkdir();
+        boolean createdUser = user.mkdir();
+
+        // Fallback to standard directory creation when there is no policy module
+        if (!createdInternals && !createdUser && (!internal.exists() || !user.exists())) {
+            internal = new File(getFilesDir().getPath(), "internal");
+            user = new File(getFilesDir().getPath(), "user");
+            internal.mkdir();
+            user.mkdir();
+        }
+
+        // Create an example file per application directory
+        File appInternalData = new File(internal, "data");
+        File userData = new File(user, "data");
+        boolean appInternalDataCreated = false;
+        boolean userDataCreated = false;
+        try {
+            appInternalDataCreated = appInternalData.createNewFile();
+            userDataCreated = userData.createNewFile();
+        } catch (IOException e) {
+            alertDialog.setMessage(getString(R.string.err_files));
+            alertDialog.show();
+        }
+
+        // Initialize example files with some text
+        if (appInternalDataCreated) {
+            try (
+                BufferedWriter writer = new BufferedWriter(new FileWriter(appInternalData))
+            ) {
+                String string = "EXPLOITED!";
+                writer.write(string);
+            } catch (IOException e) {
+                alertDialog.setMessage(getString(R.string.err_writing));
+                alertDialog.show();
+            }
+        }
+        if (userDataCreated) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(userData))) {
+                String string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Vivamus sit amet tortor at risus rutrum pulvinar quis vitae felis. " +
+                        "Sed eu sagittis est. Proin ut suscipit nisl. " +
+                        "Nullam dapibus tellus in sapien consectetur, at suscipit odio euismod. " +
+                        "Suspendisse tempus quis quam a cursus. Maecenas vel convallis nisl. " +
+                        "Integer vitae pharetra mauris. Fusce gravida varius tortor. " +
+                        "Pellentesque elementum est ac metus facilisis aliquam. " +
+                        "Pellentesque congue risus dapibus metus vehicula, " +
+                        "volutpat semper sem sodales.";
+                writer.write(string);
+            } catch (IOException e) {
+                alertDialog.setMessage(getString(R.string.err_writing));
+                alertDialog.show();
+            }
+        }
+
         permsUtil = new PermissionUtility(this, perms);
         if(!permsUtil.arePermissionsEnabled()){
             permsUtil.requestMultiplePermissions();
         }
+    }
 
+    public void goToUseCase1(View view) {
+        Intent toUseCase1 = new Intent(MainActivity.this, UseCase1Activity.class);
+        toUseCase1.putExtra("com.example.showcaseapp.intent.extra.PATH", "data");
+        startActivity(toUseCase1);
     }
 
     public void goToUseCase(View view) {
