@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.showcaseapp">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RESTORECON"/>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ShowcaseApp"
+        android:debuggable="true"
+        android:extractNativeLibs="true">
+        <activity
+            android:name=".UseCase1Activity"
+            android:label="@string/use_case_1_activity_title"
+            android:process=":user_logic">
+            <intent-filter>
+                <action android:name="com.example.showcaseapp.intent.action.SHOW"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".UseCase2Activity"
+            android:label="@string/use_case_2_activity_title"/>
+        <activity android:name=".UseCase3Activity"
+            android:label="@string/use_case_3_activity_title"
+            android:process=":media"/>
+        <activity android:name=".MainActivity"
+            android:process=":core_logic">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

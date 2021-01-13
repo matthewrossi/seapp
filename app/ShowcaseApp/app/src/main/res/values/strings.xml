@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">ShowcaseApp</string>
+    <string name="use_case_1_button">"Use case #1\nFine-granularity in access to files"</string>
+    <string name="use_case_2_button">
+        "Use case #2\nFine-granularity in access to services"
+    </string>
+    <string name="use_case_3_button">
+        "Use case #3\nIsolation of vulnerability prone components"
+    </string>
+    <string name="use_case_1_activity_title">Use case #1 — File</string>
+    <string name="use_case_2_activity_title">Use case #2 — Services</string>
+    <string name="use_case_3_activity_title">Use case #3 — Isolation</string>
+    <!-- USE CASE #1 -->
+    <string name="err_title">ERROR!</string>
+    <string name="err_files">Can\'t create required files.</string>
+    <string name="err_writing">Can\'t initialize files content.</string>
+    <string name="err_reading">Can\'t read required file.</string>
+</resources>
