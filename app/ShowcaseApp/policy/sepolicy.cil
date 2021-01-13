@@ -4,6 +4,9 @@
 	(type core_logic_d)
 	(call md_untrusteddomain (core_logic_d))
 
+	(type user_logic_d)
+	(call md_appdomain (user_logic_d))
+
 	(type ads_d)
 	(call md_appdomain (ads_d))
 	(call md_netdomain (ads_d))
@@ -12,28 +15,38 @@
 	(call md_appdomain (media_d))
 
 	(typeattribute domains)
-	(typeattributeset domains (core_logic_d ads_d media_d))
+	(typeattributeset domains (core_logic_d user_logic_d ads_d media_d))
 
 	;creation of file types
+	(type confidential_t)
+	(call mt_appdatafile (confidential_t))
 
 	;bounding the domains
 	(typebounds untrusted_app core_logic_d)
+	(typebounds untrusted_app user_logic_d)
 	(typebounds untrusted_app ads_d)
 	(typebounds untrusted_app media_d)	
 
 	;bounding file types
+	(typebounds app_data_file confidential_t)
 
 	;minimum subset of app_api_service permissions required to run the test app
 	(allow domains activity_service (service_manager (find)))
 	(allow domains activity_task_service (service_manager (find)))
 	(allow domains ashmem_device_service (service_manager (find)))
 	(allow domains audio_service (service_manager (find)))
-	(allow domains restorecon_service (service_manager (find)))
 	(allow domains surfaceflinger_service (service_manager (find)))
 	(allow domains gpu_service (service_manager (find)))
 	
+	;grant core_logic_d access to the restorecon_service
+	(allow core_logic_d restorecon_service (service_manager (find)))
+
 	;grant core_logic_d access to the location_service
 	(allow core_logic_d location_service (service_manager (find)))
+
+	;grant core_logic_d access to application confidential files
+	(allow core_logic_d confidential_t (dir (search write add_name)))
+	(allow core_logic_d confidential_t (file (create getattr open read write)))
 
 	;grant ads_d access to the services required by unity3ads
 	(allow ads_d radio_service (service_manager (find)))
@@ -46,5 +59,6 @@
 	(allow ads_d mediaserver_service (service_manager (find)))
 
 	;grant media_d access to the location_service
-	(allow media_d autofill_service (service_manager (find)))	
+	(allow media_d autofill_service (service_manager (find)))
+
 )
