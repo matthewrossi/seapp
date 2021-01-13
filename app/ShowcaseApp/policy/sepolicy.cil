@@ -32,11 +32,14 @@
 
 	;minimum subset of app_api_service permissions required to run the test app
 	(allow domains activity_service (service_manager (find)))
-	(allow domains activity_task_service (service_manager (find)))
-	(allow domains ashmem_device_service (service_manager (find)))
 	(allow domains audio_service (service_manager (find)))
 	(allow domains surfaceflinger_service (service_manager (find)))
 	(allow domains gpu_service (service_manager (find)))
+    (allow domains display_service (service_manager (find)))
+    (allow domains uimode_service (service_manager (find)))
+    (allow domains accessibility_service (service_manager (find)))
+    (allow domains input_method_service (service_manager (find)))
+    (allow domains input_service (service_manager (find)))
 	
 	;grant core_logic_d access to the restorecon_service
 	(allow core_logic_d restorecon_service (service_manager (find)))
