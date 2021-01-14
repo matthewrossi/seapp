@@ -67,8 +67,16 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 ## Tested on
 
+### Devices
+
 - Pixel 2 XL ([binaries](https://developers.google.com/android/drivers#taimenpq3a.190505.001))
 - Pixel 3 ([binaries](https://developers.google.com/android/drivers#bluelinepq3a.190505.002))
+
+### Emulator
+
+Follow the instruction in [Establishing a Build Environment](#enstablishing-a-build-environment) and [Build and run it](#build-and-run-it) with the exception that when choosing the build target you should choose either `sdk_phone_x86` or `sdk_phone_x86_64` (as suggested in [building AVD images](https://source.android.com/setup/create/avd#building_avd_images)).
+
+To improve emulator performance we recommend to enable CPU virtualization extensions and build an x86 64-bit AVD.
 
 ## Supported Android versions
 
