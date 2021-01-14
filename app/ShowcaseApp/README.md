@@ -33,9 +33,9 @@ To test it, just install the app with/without the policy module and compare the 
 - Create the `app/src/main/jniLibs` folder, open a terminal and execute the following commands to build the `.so` shared library files and move them to the right location.
 
   ```bash
-  cd $SHOWCASEAPP_ROOT_DIRECTORY
+  cd $SHOWCASEAPP_ROOT_DIRECTORY/app
   $PATH_TO_SDK/ndk/$NDK_VERSION/ndk-build
-  cp -r app/libs/arm64-v8a app/libs/x86_64 app/src/main/jniLibs
+  cp -r libs/arm64-v8a libs/x86_64 src/main/jniLibs
   ```
 
 - This last step is not something required to make the application work per se, but it is the step required to "inject" the SEApp policy module into the ShowcaseApp APK and, therefore, check how the app behavior changes between not using SEApp features and using them. You can see the instructions [here](../../script/README.md), where we describe the prerequisites and usage of the [attach-policy-to-apk.py](../../script/attach-policy-to-apk.py)
