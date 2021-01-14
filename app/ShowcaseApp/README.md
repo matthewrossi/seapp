@@ -4,42 +4,94 @@ Here we give a tour of SEApp capabilities using a Showcase app.
 At a high level perspective, SEApp enables:
 
 - fine-granularity in access to files
-
 - fine-granularity in access to services
-
 - isolation of vulnerability prone components
 
-
 The Showcase app implements a set of use cases, each of them related to one or more common vulnerability classes.
+
 We demonstrate that:
 
-- the Showcase app is perfectly working using a stock version of the system and is thus subject to the vulnerabilities
+- the Showcase app is perfectly working without a policy module and, thus, subject to the vulnerabilities
+- the Showcase app is working but the vulnerabilities are no longer exploitable when we enable the enforcement of the policy module
 
-- if we enable the enforcement of the app policy module, the app is working but is no longer subject to the vulnerabilities.
-
-To test it, just install the app on with/without the policy module and compare the execution at runtime. 
+To test it, just install the app with/without the policy module and compare the app behavior at runtime.
 
 ## Prerequisites
 
-UC2 - To build the apk create the folder `/app/libs` and save into it an unzipped copy of the [UnityAdsLibrary](https://github.com/Unity-Technologies/unity-ads-android/releases/download/3.6.0/UnityAds.aar.zip).
+- Ensure you are using our modified version of the Android SDK by following instructions in [our SDK specific readme](../SDK.md)
 
-UC3 - First you need to install in Android Studio the NDK toolkit. Go to Tools > SDK Manager and ensure you are using the modified SDK. Move to the SDK Tools tab, and install the NDK (Side by side), the Android SDK Command-line Tools and CMake. Restart Android Studio. Then create the folder `/app/src/main/jniLibs`. Open the terminal and go to the folder `$YOUR-PATH-TO-THE-MODIFIED-SKD/ndk/$NDK-VERSION/`. From that location execute the bash command `ndk-build; cp -r ../libs/arm64-v8a ../src/main/jniLibs; cp -r ../libs/x86_64 ../src/main/jniLibs/` to build the `.so` shared library files and move it to the right location. Now you can build the APK with Android Studio.
+- Create the `app/libs` folder and store into it a copy of the unzipped [UnityAdsLibrary](https://github.com/Unity-Technologies/unity-ads-android/releases/download/3.6.0/UnityAds.aar.zip) (unity-ads.aar).
 
-Injecting the policy module - If you want to equip the Showcase app with the policy module follow the instructions shown [here](../../script).
+- Install in Android Studio the following SDK extensions:
+
+  - NDK (Side by side)
+  - Android SDK Command-line Tools
+  - CMake
+
+  By going under Tools > SDK Manager, selecting the SDK extensions previously mentioned and applying changes.
+
+- Create the `app/src/main/jniLibs` folder, open a terminal and execute the following commands to build the `.so` shared library files and move them to the right location.
+
+  ```bash
+  cd $SHOWCASEAPP_ROOT_DIRECTORY
+  $PATH_TO_SDK/ndk/$NDK_VERSION/ndk-build
+  cp -r app/libs/arm64-v8a app/libs/x86_64 app/src/main/jniLibs
+  ```
+
+- This last step is not something required to make the application work per se, but it is the step required to "inject" the SEApp policy module into the ShowcaseApp APK and, therefore, check how the app behavior changes between not using SEApp features and using them. You can see the instructions [here](../../script/README.md), where we describe the prerequisites and usage of the [attach-policy-to-apk.py](../../script/attach-policy-to-apk.py)
 
 ## Demo
 
 You can either use a physical device (Pixel 2 XL / Pixel 3) or the emulator (`sdk_phone_x86_64`) to run the Showcase app.
 There are some slightly differences between them. Please reference to the specific use case section.
 
+### Use Case 1 - Files
+
+This Use Case focuses on the benefits that a SEApp has over a normal app when
+dealing with access to its internal storage.
+
+An app is built of multiple components, each one focusing on its subset
+of features. Each component as part of the same sandbox have full access
+to the app internal storage, however due to the high diversity of
+functionalities an app provides, not all components are born equal.
+Some may manage sensitive user information, while others may be exposed to
+untrusted interactions either from the user or other applications.
+
+Exploiting this components diversity with SEApp, we can compartimentalize
+components and control their access to the app internal storage.
+
+As a demostration we implemented an activity vulnerable to path traversal.
+The activity is quite straightforward, it displays the content of the file
+given its relative path through an intent. While this may not be exploitable
+when the intent is given by trusted components within the same app, the
+activity also supports implicit intents coming from untrusted sources.
+
+By sending this specifically crafted intent, therefore, we can exploit the
+vulnerable activity and see the content of any target file within the
+application internal storage.
+```bash
+adb shell am start -n com.example.showcaseapp/.UseCase1Activity -a "com.example.showcaseapp.intent.action.SHOW" --es "com.example.showcaseapp.intent.extra.PATH" "../internal/data"
+```
+
+However, with the use of SEApp we can give the untrusted component access to
+only a subset of the application internal storage, and by doing so we can
+ensure the internal directory cannot be accessed even when a path traversal
+vulnerability is exploited.
+
 ### Use Case 2 - Services
 
-In this use case we show how to support the execution of an Ads Library having guarantees that the library cannot abuse the access privileges granted by the
-user to the whole application sandbox. To give you an example, we prevent the library to access some system services sush as the location. 
-In our demonstration we confine the library into an ad-hoc process and show that a malicious component running inside the same process is prevented to access to 
-the location service. 
-In this case the malicious component is directly invoked by the library when the show ads routine is executed.
-In our demonstration we used the UnityAds library only as it is a well known non-platform framework; 
+In this use case we show how to support an Ads Library execution and, at the
+same time, guarantee that it cannot abuse access privileges granted to the
+whole application by the user.
+To give you an example, we prevent the library to access some system services,
+such as the location.
+
+In our demonstration we confine the library into an ad-hoc process and show
+that a malicious component, running inside the same process, is prevented to access
+the location service.
+In this case the malicious component is directly invoked by the library when the
+show ads routine is executed.
+In our demonstration we used the UnityAds library only as it is a well known non-platform framework;
 the policy violating component is specifically injected by us for demo purposes.
 
 To test this use case, we need to access the location. Since the AOSP is not typically equipped with real location providers, we need in some way to simulate it.
@@ -62,7 +114,7 @@ If you are using the emulator we recommend to send GPS location following these 
 
 1. start the emulator
 
-2. send GPS location changes via `adb` using the command `adb emu geo fix <longitude> <latitude>` 
+2. send GPS location changes via `adb` using the command `adb emu geo fix <longitude> <latitude>`
 
 3. start the Showcase app
 
