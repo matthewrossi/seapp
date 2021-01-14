@@ -1,13 +1,13 @@
 # SEApp Software Development Kit
 
-## Why you may it?
+## Why you may need it?
 
 When the `ext4` filesystem deals with SELinux security contexts, the default
 behavior for new files is to inherit the security context of the parent folder.
 
-However, as described in [SEApp Policy Module](README.md), we want to give you, 
-the developer, control over the security context of its application files.
-To grant this, we reuse the SELinux scheme and let the developer specify the 
+However, as described in [SEApp Policy Module](README.md), we want to give you,
+the developer, control over the security context of your application files.
+To grant this, we reuse the SELinux scheme and let the developer specify the
 security context of its application files in the `file_contexts` file.
 
 The `file_contexts` specification still is not enough to overwrite the default
@@ -29,4 +29,3 @@ skipping those steps to download the source, as you already have the AOSP source
 Open Android Studio, from the Menu Bar select Tools and SDK Manager.
 Finally, from the SDK Manager window change the Android SDK Location to match
 the SEApp SDK previously built.
-
