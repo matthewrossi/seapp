@@ -17,6 +17,8 @@ import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "Showcaseapp.MainActivity";
+
     private String[] perms = {
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.INTERNET,
@@ -44,10 +46,20 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         // Create application directory structure
-        File internal = new android.os.File(getFilesDir().getPath(), "internal");
-        File user = new android.os.File(getFilesDir().getPath(), "user");
-        boolean createdInternals = internal.mkdir();
-        boolean createdUser = user.mkdir();
+        File internal = null;
+        File user = null;
+        boolean createdInternals = false;
+        boolean createdUser = false;
+        try{
+            internal = new android.os.File(getFilesDir().getPath(), "internal");
+            user = new android.os.File(getFilesDir().getPath(), "user");
+            createdInternals = internal.mkdir();
+            createdUser = user.mkdir();
+        } catch (Exception e){
+            Log.d(TAG, "App has no policy module, cannot restore context of internal directories");
+            e.printStackTrace();
+            Log.d(TAG, "Internal directory structure will be created with java.io.File");
+        }
 
         // Fallback to standard directory creation when there is no policy module
         if (!createdInternals && !createdUser && (!internal.exists() || !user.exists())) {
@@ -55,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
             user = new File(getFilesDir().getPath(), "user");
             internal.mkdir();
             user.mkdir();
+            Log.d(TAG, "Internal directory structure created successfully");
         }
 
         // Create an example file per application directory
