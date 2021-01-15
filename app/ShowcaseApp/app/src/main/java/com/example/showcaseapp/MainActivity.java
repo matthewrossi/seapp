@@ -97,15 +97,21 @@ public class MainActivity extends AppCompatActivity {
         }
         if (userDataCreated) {
             try (BufferedWriter writer = new BufferedWriter(new FileWriter(userData))) {
-                String string = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-                        "Vivamus sit amet tortor at risus rutrum pulvinar quis vitae felis. " +
-                        "Sed eu sagittis est. Proin ut suscipit nisl. " +
-                        "Nullam dapibus tellus in sapien consectetur, at suscipit odio euismod. " +
-                        "Suspendisse tempus quis quam a cursus. Maecenas vel convallis nisl. " +
-                        "Integer vitae pharetra mauris. Fusce gravida varius tortor. " +
-                        "Pellentesque elementum est ac metus facilisis aliquam. " +
-                        "Pellentesque congue risus dapibus metus vehicula, " +
-                        "volutpat semper sem sodales.";
+                String string = "This Use Case proves the benefits a SEApp has over a normal app " +
+                        "when dealing with access to its internal storage.\nTo demonstrate this, " +
+                        "we show how the current activity, besides suffering of a path traversal " +
+                        "vulnerability, cannot be exploited when the app is associated with a " +
+                        "properly configured SEApp policy module.\n\nThe activity given an " +
+                        "intent containing a file path displays its content. While this may be " +
+                        "\"fine\" when the intent comes only from trusted components (other " +
+                        "components within the same app), the activity supports implicit intents " +
+                        "coming from untrusted sources too.\nTherefore, by sending a " +
+                        "specifically crafted intent, we can exploit the vulnerable activity and " +
+                        "see the content of any target file within the application internal " +
+                        "storage.\n\nUsing ADB:\nadb shell\nam start " +
+                        "-n com.example.showcaseapp/.UseCase1Activity\n" +
+                        "-a \"com.example.showcaseapp.intent.action.SHOW\"\n" +
+                        "--es \"com.example.showcaseapp.intent.extra.PATH\"\n\"../internal/data\"";
                 writer.write(string);
             } catch (IOException e) {
                 alertDialog.setMessage(getString(R.string.err_writing));
@@ -125,19 +131,16 @@ public class MainActivity extends AppCompatActivity {
         startActivity(toUseCase1);
     }
 
-    public void goToUseCase(View view) {
+    public void goToUseCase2Or3(View view) {
         Button clickedButton = (Button) view;
         String text = clickedButton.getText().toString();
         int idx = Character.getNumericValue(text.charAt(text.indexOf("#") + 1)) - 1;
-        if (idx == 1 || idx == 2)
-            if (!permsUtil.arePermissionsEnabled()) {
-                showAdvice();
-                idx = -1;
-            }
-        if (idx >= 0) {
-            Intent toUseCase = new Intent(MainActivity.this, classes[idx]);
-            startActivity(toUseCase);
+        if (!permsUtil.arePermissionsEnabled()) {
+            showAdvice();
+            return;
         }
+        Intent toUseCase = new Intent(MainActivity.this, classes[idx]);
+        startActivity(toUseCase);
     }
 
     private void showAdvice(){
