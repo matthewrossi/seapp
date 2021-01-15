@@ -14,7 +14,9 @@
     <string name="err_title">ERROR!</string>
     <string name="err_files">Can\'t create required files.</string>
     <string name="err_writing">Can\'t initialize files content.</string>
-    <string name="err_reading">Can\'t read required file.</string>
+    <string name="err_reading">
+        Not this time! You have no permission to read this.
+    </string>
     <!-- USE CASE #3 -->
     <string name="captured_location_advice">Captured location coordinates</string>
 </resources>
