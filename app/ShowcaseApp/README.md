@@ -60,7 +60,7 @@ untrusted interactions either from the user or other applications.
 Exploiting this components diversity with SEApp, we can compartimentalize
 components and control their access to the app internal storage.
 
-As a demostration we implemented an activity vulnerable to path traversal.
+As a demonstration we implemented an activity vulnerable to path traversal.
 The activity is quite straightforward, it displays the content of the file
 given its relative path through an intent. While this may not be exploitable
 when the intent is given by trusted components within the same app, the
