@@ -46,14 +46,14 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         // Create application directory structure
-        File internal = null;
+        File confidential = null;
         File user = null;
         boolean createdInternals = false;
         boolean createdUser = false;
         try{
-            internal = new android.os.File(getFilesDir().getPath(), "internal");
+            confidential = new android.os.File(getFilesDir().getPath(), "confidential");
             user = new android.os.File(getFilesDir().getPath(), "user");
-            createdInternals = internal.mkdir();
+            createdInternals = confidential.mkdir();
             createdUser = user.mkdir();
         } catch (Exception e){
             Log.d(TAG, "App has no policy module, cannot restore context of internal directories");
@@ -62,16 +62,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Fallback to standard directory creation when there is no policy module
-        if (!createdInternals && !createdUser && (!internal.exists() || !user.exists())) {
-            internal = new File(getFilesDir().getPath(), "internal");
+        if (!createdInternals && !createdUser && (!confidential.exists() || !user.exists())) {
+            confidential = new File(getFilesDir().getPath(), "confidential");
             user = new File(getFilesDir().getPath(), "user");
-            internal.mkdir();
+            confidential.mkdir();
             user.mkdir();
             Log.d(TAG, "Internal directory structure created successfully");
         }
 
         // Create an example file per application directory
-        File appInternalData = new File(internal, "data");
+        File appInternalData = new File(confidential, "data");
         File userData = new File(user, "data");
         boolean appInternalDataCreated = false;
         boolean userDataCreated = false;
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
                         "storage.\n\nUsing ADB:\nadb shell\nam start " +
                         "-n com.example.showcaseapp/.UseCase1Activity\n" +
                         "-a \"com.example.showcaseapp.intent.action.SHOW\"\n" +
-                        "--es \"com.example.showcaseapp.intent.extra.PATH\"\n\"../internal/data\"";
+                        "--es \"com.example.showcaseapp.intent.extra.PATH\"\n\"../confidential/data\"";
                 writer.write(string);
             } catch (IOException e) {
                 alertDialog.setMessage(getString(R.string.err_writing));
