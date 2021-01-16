@@ -70,12 +70,12 @@ By sending this specifically crafted intent, therefore, we can exploit the
 vulnerable activity and see the content of any target file within the
 application internal storage.
 ```bash
-adb shell am start -n com.example.showcaseapp/.UseCase1Activity -a "com.example.showcaseapp.intent.action.SHOW" --es "com.example.showcaseapp.intent.extra.PATH" "../internal/data"
+adb shell am start -n com.example.showcaseapp/.UseCase1Activity -a "com.example.showcaseapp.intent.action.SHOW" --es "com.example.showcaseapp.intent.extra.PATH" "../confidential/data"
 ```
 
 However, with the use of SEApp we can give the untrusted component access to
 only a subset of the application internal storage, and by doing so we can
-ensure the internal directory cannot be accessed even when a path traversal
+ensure the confidential directory cannot be accessed even when a path traversal
 vulnerability is exploited.
 
 ### Use Case 2 - Services

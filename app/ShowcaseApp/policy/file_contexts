@@ -1,2 +1,2 @@
-.*                  u:object_r:app_data_file:s0
-files/internal      u:object_r:com_example_showcaseapp.confidential_t:s0
+.*			u:object_r:app_data_file:s0
+files/confidential	u:object_r:com_example_showcaseapp.confidential_t:s0
