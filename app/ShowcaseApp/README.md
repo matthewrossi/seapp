@@ -75,7 +75,7 @@ adb shell am start -n com.example.showcaseapp/.UseCase1Activity -a "com.example.
 
 However, with the use of SEApp we can give the untrusted component access to
 only a subset of the application internal storage, and by doing so we can
-ensure the confidential directory cannot be accessed even when a path traversal
+ensure the `confidential` directory cannot be accessed even when a path traversal
 vulnerability is exploited.
 
 ### Use Case 2 - Services
