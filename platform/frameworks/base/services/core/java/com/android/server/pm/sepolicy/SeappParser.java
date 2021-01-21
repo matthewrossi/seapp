@@ -149,10 +149,10 @@ public class SeappParser {
                 !newSeappContext.levelFromSet)
             return false;
 
-        // _isolated run in isolated_app domain and processName = pkgName
+        // _isolated run in isolated_app domain and processName = pkgName*
         if (VALUE_ISOLATED.equals(newSeappContext.user) &&
                 (!VALUE_ISOLATED_APP.equals(newSeappContext.domain) ||
-                !pkgName.equals(newSeappContext.name)))
+                !(pkgName + "*").equals(newSeappContext.name)))
             return false;
 
         // _app can't run in isolated_app domain
