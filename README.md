@@ -72,7 +72,7 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 ### Emulator
 
 Follow the instruction in [Establishing a Build Environment](#enstablishing-a-build-environment) and [Build and run it](#build-and-run-it) with the 
-exception that when choosing the build target you should choose `sdk_phone_x86_64` (as suggested in [building AVD images(https://source.android.com/setup/create/avd#building_avd_images)).
+exception that when choosing the build target you should choose `sdk_phone_x86_64` (as suggested in [building AVD images](https://source.android.com/setup/create/avd#building_avd_images)).
 
 To improve emulator performance we recommend to enable CPU virtualization extensions and build an x86 64-bit AVD.
 
