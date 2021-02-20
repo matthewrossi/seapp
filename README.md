@@ -52,7 +52,7 @@ Set up your local work environment to build the Android source files.
 [Establishing a Build Environment](https://source.android.com/setup/build/initializing) details all the required steps,
 according to your operating system.
 
-Download the source tree for the specific `android-9.0.0_r39` code-line, which is what this branch is based on.
+Download the source tree for the specific `android-10.0.0_r41` code-line, which is what this branch is based on.
 See [Downloading the Source](https://source.android.com/setup/build/downloading) for the step-by-step instructions.
 
 Finally, overwrite the AOSP files with the ones provided in this repository to
