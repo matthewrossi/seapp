@@ -5,22 +5,21 @@
 Developers interested in taking advantage of our approach to improve the
 security of their apps are required to load the policy into their Android
 Pacakge (APK).
-A predefined directory, policy, at the root of the archive, is where the
-SEApp-aware package installer will be looking for the policy module.
+A predefined directory, `policy`, at the root of the archive, is where the
+SEApp-aware package installer will be looking for the policy module (see the Figure).
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/15113769/94331700-1393fc00-ffcf-11ea-8079-0950bb7a4163.png"
-        alt="SEApp policy structure" width="30%">
+        alt="SEApp policy structure" width="20%">
 </p>
 
-To automate the procedure required to modify the apk and enrich it
-with the SEApp policy module, we provide the [attach-policy-to-apk.py](attach-policy-to-apk.py)
-script.
+To make development easier we provide the [attach-policy-to-apk.py](attach-policy-to-apk.py)
+script, that loads the policy folder (i.e., the directory that stores the policy files) inside an apk, and signs it.
 
 ### Prerequisites
 
-Download the Android SDK Build Tools revision correspondant to the Android
-version you are targeting and add it to your path.
+Download the Android SDK Build Tools revision that matches the Android
+version you are targeting and add it to the `$PATH`.
 
 ### Usage
 
@@ -42,14 +41,14 @@ optional arguments:
 ```
 
 To avoid the specification of every parameter everytime the script is run
-it is possible to specify their default values within the configuration files:
+it is possible to set their default values within the following configuration files:
 
 - `.unsigned_apk_path`:   path to the unsigned apk
 - `.signed_apk_path`:     path to the signed apk
 - `.policy_default_path`: path to the policy module directory
 - `.signer`:              path to the keystore used to sign the APK
 
-NOTE: the configuration files need to be within the directory where the
+NOTE: the configuration files need to be placed within the directory where the
 script is run.
 
 ## [backup.sh](backup.sh)
@@ -92,7 +91,7 @@ policy not already explicitly listed.
 
 ### mac_permissions.xml
 
-The mac_permissions.xml file is used for controlling the Middleware MAC
+The mac_permissions.xml file is used to control the Middleware MAC
 solutions, as well as mapping a public base16 signing key with an arbitrary
 `seinfo` string. Details of the files contents can be found in a comment at 
 the top of the platform [mac_permissions.xml](https://android.googlesource.com/platform/system/sepolicy/+/refs/tags/android-9.0.0_r39/private/mac_permissions.xml) file.
@@ -109,6 +108,4 @@ Usage:
   -f POLICY, --file POLICY    mac_permissions.xml policy file
 ```
 
-NOTE: to highlight the need to create a valid mac_permissions.xml in the
-SEApp policy module based on your app signer, we substituted our version of
-the mac_permissions.xml with a [template](../app/SEPolicyTestApp/policy/mac_permissions_template.xml) you can enrich by using the [post_process_mac_perms.py](post_process_mac_perms.py) tool.
+NOTE: we have uploaded to the repo a [template](../app/SEPolicyTestApp/policy/mac_permissions_template.xml) that can be modified by using the [post_process_mac_perms.py](post_process_mac_perms.py) tool.
