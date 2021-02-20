@@ -10,7 +10,7 @@ The developer is able to operate at two different levels:
 
  - the actual definition of the app policy logic using the policy language described in [Policy module syntax](#Policy-module-syntax) (written to the `sepolicy.cil` file)
 
- - the configuration of the security context described in [Policy configration](#Policy-configuration) for each process (in the `seapp_contexts` and `mac_permissions.xml`) and for each file directory (in the file `file_contexts`).
+ - the configuration of the security context described in [Policy configuration](#Policy-configuration) for each process (in the `seapp_contexts` and `mac_permissions.xml`) and for each file directory (in the file `file_contexts`).
 
 ## Policy module syntax
 
@@ -25,7 +25,7 @@ been selected for the representation of an app policy module.
 The syntax is shortly shown in the following picture.
 
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/15113769/103461506-2b41f580-4d1f-11eb-9525-cc01b2fa3417.png"
+    <img src="policy_syntax.png"
         alt="Application policy module CIL syntax">
 </p>
 
@@ -52,21 +52,14 @@ app package name), and global system types _T<sub>S</sub>_ (system namespace).
 
 Each Access Vector rule, declared by an `allow` statement, is evaluated looking
 at the source and target type identifiers.
-
-Here are the emerging cases and how they are constrained:
-
-<p align="center">
-    <img src="https://user-images.githubusercontent.com/15113769/94330301-a333ad80-ffc3-11ea-8133-fc023bfe5275.png"
-        alt="Varieties of allow statements" width="50%">
-</p>
+There are four cases:
 
 - _AllowSS_ is prohibited, as it represents a direct platform policy
 modification
 
-- _AllowSA_ is prohibited, as it might change system services security
-assumptions, however indirect assignment by calling our macros
-is available to permit system services necessary to the functioning of apps to
-work as intended by the system policy. The list of available macros follows:
+- _AllowSA_ is prohibited, as it might change the security assumptions of system services.
+To ensure the newly introduced types are interoperable with system services, the developer 
+can use indirect assignment of permissions. This is done by calling one of the macros listed below:
   - _md_appdomain_: to label app domains
   - _md_bluetoothdomain_: to access bluetooth
   - _md_netdomain_: to access network
@@ -78,15 +71,15 @@ SELinux decision engine during policy enforcement.
 This crucial postponed restriction depends on the constraint that all app types
 have to appear in a `typebounds` statement, which limits the bounded type to
 have at most the access privileges of the bounding type. As Android 10 assigns
-to generic third-party apps the `untrusted_app` domain, this is the parent type
-that is used to bound the app types
+to generic third-party apps the `untrusted_app` domain, this is the bounding type
+that is used to bound the types introduced by the developer
 
 - _AllowAA_ is always permitted, as it only defines access privileges internal
 to the policy module
 
 A number of other constraints are enforced by the policy module validator. 
-For a more detailed explanation we  suggest to have a look at our paper or to 
-look directly to the policy validator.
+For a more detailed explanation we recommend to have a look at our paper or to 
+look directly to the policy parser.
 
 ## Policy configuration
 
@@ -96,7 +89,7 @@ SEApp permits to assign a SELinux domain to each process of the security
 enhanced app. To do this, the developer lists in the local seapp_contexts a set
 of entries that determine the security context to use for its processes.
 
-For each entry, we restrict the list of valid input selectors to `user`, 
+For each entry, we restrict the list of valid input selectors to `user,` 
 `seinfo` and `name`.
 
 - `user` is a selector based upon the type of UID
@@ -178,11 +171,12 @@ to the secret process:
 ```
 (block package_name
     (type secret)
-    (typeattributeset domain (secret))
+    (call md_appdomain (secret))
+    (typebounds untrusted_app secret)
     (allow secret cameraserver_service (service_manager (find)))
 ...)
 ```
 
 ## Example
 
-You can find a simple security-enhanced application [here](SEPolicyTestApp) and its policy module [here](SEPolicyTestApp/policy).
+You can find a simple security-enhanced application [here](ShowcaseApp) and its policy module [here](ShowcaseApp/policy).
