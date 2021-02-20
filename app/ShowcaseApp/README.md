@@ -28,7 +28,7 @@ To test it, just install the app with/without the policy module and compare the 
   - Android SDK Command-line Tools
   - CMake
 
-  By going under Tools > SDK Manager, selecting the SDK extensions previously mentioned and applying changes.
+  You can do this going under Tools > SDK Manager, selecting the SDK extensions previously mentioned and applying changes.
 
 - Create the `app/src/main/jniLibs` folder, open a terminal and execute the following commands to build the `.so` shared library files and move them to the right location.
 
@@ -47,15 +47,14 @@ There are some slightly differences between them. Please reference to the specif
 
 ### Use Case 1 - Files
 
-This Use Case focuses on the benefits that a SEApp has over a normal app when
+This Use Case highlights the benefits of a security enhanced app when
 dealing with access to its internal storage.
 
-An app is built of multiple components, each one focusing on its subset
-of features. Each component as part of the same sandbox have full access
-to the app internal storage, however due to the high diversity of
-functionalities an app provides, not all components are born equal.
-Some may manage sensitive user information, while others may be exposed to
-untrusted interactions either from the user or other applications.
+An app is built of multiple components, each one focusing on its feature subset.
+Each component as part of the same sandbox have full access
+to the app internal storage. This is a problem, since some may manage sensitive 
+user information, while others may be exposed to untrusted interactions either 
+from the user or other applications.
 
 Exploiting this components diversity with SEApp, we can compartimentalize
 components and control their access to the app internal storage.
@@ -63,10 +62,10 @@ components and control their access to the app internal storage.
 As a demonstration we implemented an activity vulnerable to path traversal.
 The activity is quite straightforward, it displays the content of the file
 given its relative path through an intent. While this may not be exploitable
-when the intent is given by trusted components within the same app, the
+when the intent is sent by trusted components within the same app, the
 activity also supports implicit intents coming from untrusted sources.
 
-By sending this specifically crafted intent, therefore, we can exploit the
+Thus, by sending the following intent we can exploit the
 vulnerable activity and see the content of any target file within the
 application internal storage.
 ```bash
@@ -94,7 +93,8 @@ show ads routine is executed.
 In our demonstration we used the UnityAds library only as it is a well known non-platform framework;
 the policy violating component is specifically injected by us for demo purposes.
 
-To test this use case, we need to access the location. Since the AOSP is not typically equipped with real location providers, we need in some way to simulate it.
+To test this use case, we need to access the location. Since the AOSP is not typically equipped with _real_
+location providers, we need in some way to simulate it.
 
 If you are using a physical device follow these steps:
 
@@ -118,11 +118,25 @@ If you are using the emulator we recommend to send GPS location following these 
 
 3. start the Showcase app
 
-If you are using the emulator you could also connect to it via telnet and then send updates via console. Please keep in mind that
-the emulator is sometimes subject to unexpected behavior; if the showcase app is not retrieving the position correctly, restarting the emulator fixes the problem.
+If you are using the emulator you could also connect to it via telnet and then send updates via console. 
+Please keep in mind that the emulator is sometimes subject to unexpected behavior; if the showcase app is not 
+retrieving the position correctly, restarting the emulator fixes the problem.
 
 ### Use Case 3 - Isolation of media
 
-In this use case we demonstrate how native components, that are relying on shared/static libraries that may be prone to vulnerabilites, can be isolated from the rest of the appliacation. Isolation works again at process level.
+In this use case we demonstrate how native components, that are relying on shared/static libraries that may 
+be prone to vulnerabilites, can be isolated from the rest of the appliacation. Isolation works again at process level.
 
-We initially create a shared library which is shipped within the application. Then we call the library via JNI. We imagine a scenario in which the shared library is used to process media, so we connect to the camera service (that might be useful for the duty) in the C-side of the code. The shared library successfully returns the handle to the camera service to the current use case activity (true also when the policy is active, since `find` on camera service is granted). The shared library is then called (again) to carry out some basic algebra computation. Finally, we get to our vulnerability. The rationale is that we don't want shared libraries (that may be subject to memory corruption errors and so on) to be executed in a process that has access to the network. But, access to network state (state) is granted at install time to the whole application sandbox, so the shared library code running in a stock version of the system will still be able to get a reference to the connectivity manager and succesfully bind the current process to the network. We demonstrate that this is no longer possible with our approach, as network access can be restricted in the sepolicy file by using the macros in an easy way. The potentially vulnerable library would still be able to connect to the connectivity service, but when the policy is enforcing, the current process won't be able to bind itself to the network, as SELinux denies the `create` on `udp_socket`.
+We initially create a native library which is shipped within the application. Then we call the library via JNI. 
+We imagine a scenario in which the native library is used to process media, so we connect to the camera service 
+(that might be useful for the duty) in the C-side of the code. The native library successfully returns a reference 
+to the camera service to the current use case activity (true also when the policy is active, since `find` on camera 
+service is granted). The native library is then called (again) to carry out some basic algebra computation. Finally, 
+we get to our vulnerability. The rationale is that we don't want native libraries (that may be subject to memory 
+corruption errors and so on) to be executed in a process that has access to the network. But, access to network 
+state (state) is granted at install time to the whole application sandbox, so the native library code running in 
+a stock version of the system will still be able to get a reference to the connectivity manager and succesfully 
+bind the current process to the network. We demonstrate that this is no longer possible in a security enhanced app,
+as network access can be restricted in the sepolicy file by using the macros in an easy way. The potentially 
+vulnerable library would still be able to connect to the connectivity service, but when the policy is enforcing, 
+the current process won't be able to bind itself to the network, as SELinux denies the `create` on `udp_socket`.
