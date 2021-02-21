@@ -79,22 +79,23 @@ vulnerability is exploited.
 
 ### Use Case 2 - Services
 
-In this use case we show how to support an Ads Library execution and, at the
-same time, guarantee that it cannot abuse access privileges granted to the
-whole application by the user.
-To give you an example, we prevent the library to access some system services,
-such as the location.
+In this Use Case we show how to confine an Ad library into an
+ad-hoc process, with guarantees that it cannot abuse the access
+privileges granted to the whole application sandbox by the
+user. To do that, we deliberately inject, in the same process the
+library is executed, a malicious component (which is directly
+invoked by the library) that tries to capture the location when
+the permission ACCESS_FINE_LOCATION is granted to the
+app. 
 
-In our demonstration we confine the library into an ad-hoc process and show
-that a malicious component, running inside the same process, is prevented to access
-the location service.
-In this case the malicious component is directly invoked by the library when the
-show ads routine is executed.
-In our demonstration we used the UnityAds library only as it is a well known non-platform framework;
-the policy violating component is specifically injected by us for demo purposes.
+We show that when the policy module is enforced by
+SEApp, the malicious component cannot access the GPS co-
+ordinates. In our demonstration we used the UnityAds library only as 
+it is a well known non-platform framework; the policy violating 
+component is specifically injected by us for demo purposes.
 
-To test this use case, we need to access the location. Since the AOSP is not typically equipped with _real_
-location providers, we need in some way to simulate it.
+To test this use case, we need to access the location. Since the AOSP is not 
+typically equipped with _real_ location providers, we need in some way to simulate it.
 
 If you are using a physical device follow these steps:
 
@@ -124,19 +125,17 @@ retrieving the position correctly, restarting the emulator fixes the problem.
 
 ### Use Case 3 - Isolation of media
 
-In this use case we demonstrate how native components, that are relying on shared/static libraries that may 
-be prone to vulnerabilites, can be isolated from the rest of the appliacation. Isolation works again at process level.
+In this use case we show how to confine a set of components,
+which rely on a simple _high performance_ native library written in
+C to perform some task. Our goal is to demonstrate that the
+context running the native library code is prevented to access 
+the network, even when the permissions INTERNET and
+ACCESS_NETWORK_STATE are granted to the app sandbox.
 
-We initially create a native library which is shipped within the application. Then we call the library via JNI. 
-We imagine a scenario in which the native library is used to process media, so we connect to the camera service 
-(that might be useful for the duty) in the C-side of the code. The native library successfully returns a reference 
-to the camera service to the current use case activity (true also when the policy is active, since `find` on camera 
-service is granted). The native library is then called (again) to carry out some basic algebra computation. Finally, 
-we get to our vulnerability. The rationale is that we don't want native libraries (that may be subject to memory 
-corruption errors and so on) to be executed in a process that has access to the network. But, access to network 
-state (state) is granted at install time to the whole application sandbox, so the native library code running in 
-a stock version of the system will still be able to get a reference to the connectivity manager and succesfully 
-bind the current process to the network. We demonstrate that this is no longer possible in a security enhanced app,
-as network access can be restricted in the sepolicy file by using the macros in an easy way. The potentially 
-vulnerable library would still be able to connect to the connectivity service, but when the policy is enforcing, 
-the current process won't be able to bind itself to the network, as SELinux denies the `create` on `udp_socket`.
+We show that when the policy module is missing, the native library can 
+connect to the ConnectivityManager and successfully bind the
+current process to the network. Instead, when the policy module
+is enforced by SEApp, this action is denied. This happens because
+binding a process to the network is associated with opening a
+network socket, an operation not permitted by SELinux without
+the required permissions.
