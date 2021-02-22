@@ -4,17 +4,18 @@
 
 Developers interested in taking advantage of our approach to improve the
 security of their apps are required to load the policy into their Android
-Pacakge (APK).
-A predefined directory, `policy`, at the root of the archive, is where the
-SEApp-aware package installer will be looking for the policy module (see the Figure).
+Package (APK).
+SEApp-aware package installer will be looking for the policy module in
+the `policy` directory at the root of the archive (as shown in the following figure).
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/15113769/94331700-1393fc00-ffcf-11ea-8079-0950bb7a4163.png"
         alt="SEApp policy structure" width="20%">
 </p>
 
-To make development easier we provide the [attach-policy-to-apk.py](attach-policy-to-apk.py)
-script, that loads the policy folder (i.e., the directory that stores the policy files) inside an apk, and signs it.
+To facilitate development we provide the [attach-policy-to-apk.py](attach-policy-to-apk.py)
+script, a script that loads the policy folder (i.e., the directory that stores the policy files)
+inside the apk, and signs it.
 
 ### Prerequisites
 
