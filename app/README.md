@@ -8,20 +8,19 @@ and objects related to her app.
 
 The developer is able to operate at two different levels:
 
- - the actual definition of the app policy logic using the policy language described in [Policy module syntax](#Policy-module-syntax) (written to the `sepolicy.cil` file)
+- the actual definition of the app policy logic using the policy language described in [Policy module syntax](#Policy-module-syntax) (written to the `sepolicy.cil` file)
 
- - the configuration of the security context described in [Policy configuration](#Policy-configuration) for each process (in the `seapp_contexts` and `mac_permissions.xml`) and for each file directory (in the file `file_contexts`).
+- the configuration of the security context described in [Policy configuration](#Policy-configuration) for each process (in the `seapp_contexts` and `mac_permissions.xml`) and for each file directory (in the file `file_contexts`).
 
 ## Policy module syntax
 
 SELinux policies come to Android devices written in the SELinux Common
 Intermediate Language (CIL).
 Therefore, to avoid any additional translation step on the device, it
-represents most fitting language to define SEApp policy modules.
+represents the most fitting language to define SEApp policy modules.
 
-CIL offers a multitude of commands to define a policy, but only a subset has
-been selected for the representation of an app policy module.
-
+CIL offers a multitude of commands, but only a subset of its statments have
+been selected to define an app policy module.
 The syntax is shortly shown in the following picture.
 
 <p align="center">
@@ -39,7 +38,6 @@ consider the integration of apps and system policies.
 To ensure that policy modules do not interfere with the system policy and among
 each other, a first necessity is that policy modules are wrapped in a unique
 namespace.
-
 This is done through the definition of a CIL block using the package name,
 which prevents the definition of the same SELinux type twice, as the resulting
 global identifier is formed by the concatenation of the namespace and the local
@@ -58,7 +56,7 @@ There are four cases:
 modification
 
 - _AllowSA_ is prohibited, as it might change the security assumptions of system services.
-To ensure the newly introduced types are interoperable with system services, the developer 
+To ensure the newly introduced types are interoperable with system services, the developer
 can use indirect assignment of permissions. This is done by calling one of the macros listed below:
   - _md_appdomain_: to label app domains
   - _md_bluetoothdomain_: to access bluetooth
@@ -77,8 +75,8 @@ that is used to bound the types introduced by the developer
 - _AllowAA_ is always permitted, as it only defines access privileges internal
 to the policy module
 
-A number of other constraints are enforced by the policy module validator. 
-For a more detailed explanation we recommend to have a look at our paper or to 
+A number of other constraints are enforced by the policy module validator.
+For a more detailed explanation we recommend to have a look at our paper [[1]](#1) or to
 look directly to the policy parser.
 
 ## Policy configuration
@@ -86,10 +84,10 @@ look directly to the policy parser.
 ### Processes
 
 SEApp permits to assign a SELinux domain to each process of the security
-enhanced app. To do this, the developer lists in the local seapp_contexts a set
+enhanced app. To do this, the developer lists in the local `seapp_contexts` a set
 of entries that determine the security context to use for its processes.
 
-For each entry, we restrict the list of valid input selectors to `user,` 
+For each entry, we restrict the list of valid input selectors to `user`,
 `seinfo` and `name`.
 
 - `user` is a selector based upon the type of UID
@@ -119,7 +117,7 @@ In Android developers have to focus on components rather than processes.
 Normally, all components of an application run in a single process.
 However, it is possible to change this default behavior setting the
 `android:process` attribute of the respective component inside the
-AndroidManifest.xml.
+`AndroidManifest.xml`.
 With the specification of an `android:process` consistent with the
 `seapp_contexts` configuration, we support the assignment of distinct
 domains to app components.
@@ -138,8 +136,9 @@ file, etc)
 - `security_context` is the security context used to label the resource.
 
 The admissible entries are those confined to the app dedicated directory
-and using types defined by the app policy module, with the exception of
-`app_data_file`.
+and using types defined by the app policy module with the exception of
+`app_data_file` (which is allowed, besides being a system type, as it is
+the default type for app internal data).
 Due to the regexp support, a path may suit more entries, in which case the most
 specific one is used.
 
@@ -151,9 +150,9 @@ dir/unclassified        u:object_r:package_name.unclassified_file:s0
 dir/secret              u:object_r:package_name.secret_file:s0
 ```
 
-where the first line describes the default label for app files, the other two
-lines specify a respective label for files in directories dir/unclassified and
-dir/secret.
+where the first line describes the default label for app files and the other two
+lines specify a label for files in directories `dir/unclassified` and
+`dir/secret`, respectively.
 
 ### System services
 
@@ -177,6 +176,19 @@ to the secret process:
 ...)
 ```
 
-## Example
+## Examples
 
-You can find a simple security-enhanced application [here](ShowcaseApp) and its policy module [here](ShowcaseApp/policy).
+In this folder you can find the following security-enhanced application examples:
+
+- [SEPolicyTestApp](SEPolicyTestApp): a simple security-enhanced app managing access
+to its internal files (policy module available [here](SEPolicyTestApp/policy))
+- [ShowcaseApp](ShowcaseApp): a more feature rich security-enhanced app that shows the
+full potential of SEApp when it comes down to preventing app vulnerabilities exploitation
+(policy module available [here](ShowcaseApp/policy))
+
+## References
+
+<a id="1">[1]</a>
+M. Rossi, D. Facchinetti, E. Bacis, M. Rosa and S. Paraboschi.
+SEApp: Bringing Mandatory Access Control to Android Apps.
+In _Proceeding of the 30th USENIX Security Symposium_, 2021. (Available soon).
