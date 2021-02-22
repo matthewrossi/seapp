@@ -28,7 +28,7 @@ To test it, just install the app with/without the policy module and compare the 
   - Android SDK Command-line Tools
   - CMake
 
-  You can do this going under Tools > SDK Manager, selecting the SDK extensions previously mentioned and applying changes.
+  You can do this going under Tools > SDK Manager, selecting the SDK extensions above and applying changes.
 
 - Create the `app/src/main/jniLibs` folder, open a terminal and execute the following commands to build the `.so` shared library files and move them to the right location.
 
@@ -43,7 +43,7 @@ To test it, just install the app with/without the policy module and compare the 
 ## Demo
 
 You can either use a physical device (Pixel 2 XL / Pixel 3) or the emulator (`sdk_phone_x86_64`) to run the Showcase app.
-There are some slightly differences between them. Please reference to the specific use case section.
+There are some slightly differences between them, you can find further details in the following use case specific sections.
 
 ### Use Case 1 - Files
 
@@ -55,7 +55,6 @@ Each component as part of the same sandbox have full access
 to the app internal storage. This is a problem, since some may manage sensitive 
 user information, while others may be exposed to untrusted interactions either 
 from the user or other applications.
-
 Exploiting this components diversity with SEApp, we can compartimentalize
 components and control their access to the app internal storage.
 
@@ -64,7 +63,6 @@ The activity is quite straightforward, it displays the content of the file
 given its relative path through an intent. While this may not be exploitable
 when the intent is sent by trusted components within the same app, the
 activity also supports implicit intents coming from untrusted sources.
-
 Thus, by sending the following intent we can exploit the
 vulnerable activity and see the content of any target file within the
 application internal storage.
@@ -82,41 +80,33 @@ vulnerability is exploited.
 In this Use Case we show how to confine an Ad library into an
 ad-hoc process, with guarantees that it cannot abuse the access
 privileges granted to the whole application sandbox by the
-user. To do that, we deliberately inject, in the same process the
+user. To do so, we deliberately inject, in the same process the
 library is executed, a malicious component (which is directly
 invoked by the library) that tries to capture the location when
 the permission ACCESS_FINE_LOCATION is granted to the
-app. 
+app. We show that when the policy module is enforced by
+SEApp, the malicious component cannot access the GPS coordinates.
 
-We show that when the policy module is enforced by
-SEApp, the malicious component cannot access the GPS co-
-ordinates. In our demonstration we used the UnityAds library only as 
-it is a well known non-platform framework; the policy violating 
-component is specifically injected by us for demo purposes.
+In our demonstration we used the UnityAds library as
+it is a well known non-platform ads framework. The policy violating
+component has been introduced by us for demo purposes.
 
-To test this use case, we need to access the location. Since the AOSP is not 
-typically equipped with _real_ location providers, we need in some way to simulate it.
+To test this use case, we need to access the location. Since the AOSP is not
+typically equipped with _real_ location providers, we need some way to simulate it.
 
 If you are using a physical device follow these steps:
 
 1. enable the developer options on your device
-
 2. enable the location
-
 3. install a mock location app, for example [FakeTraveler](https://github.com/mcastillof/FakeTraveler)
-
 4. in system settings, select the mock location app
-
 5. open the mock location app and enable (repeated) location changes
-
 6. start the Showcase app
 
 If you are using the emulator we recommend to send GPS location following these steps:
 
 1. start the emulator
-
 2. send GPS location changes via `adb` using the command `adb emu geo fix <longitude> <latitude>`
-
 3. start the Showcase app
 
 If you are using the emulator you could also connect to it via telnet and then send updates via console. 
