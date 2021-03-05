@@ -11,15 +11,15 @@ system domains and it was mainly aimed at separating system resources from user
 apps.
 In the next releases, the configuration of SELinux has progressively become
 more complex, with a growing set of domains isolating different services and
-resources, so that a bug or vulnerability in some system components does not
+resources, so that a bug or vulnerability in some system component does not
 lead to a direct compromise of the whole system.
 The introduction of SELinux into Android has been a clear success.
 Unfortunately, the stronger protection benefits do not extend to regular apps
 which are assigned with a single domain named `untrusted_app`.
 Since Android 9, isolation of apps is enforced also with the use of categories,
-which guarantees that distinct apps operate with incompatible security contexts.
+which guarantee that distinct apps operate with incompatible security contexts.
 Our proposal, SEApp, builds upon the observation that giving app developers the
-ability to apply MAC to the internal structure of the app would provide a stronger
+ability to apply MAC to the internal structure of the app would provide stronger
 protection against a number of common [internal vulnerabilities](https://static.googleusercontent.com/media/www.google.com/en//about/appsecurity/play-rewards/Android_app_vulnerability_classes.pdf) (see the [Showcase app](./app/ShowcaseApp) to have a glimpse of SEApp capabilities).
 
 The following image depicts the evolution of SELinux since its introduction in
@@ -36,15 +36,15 @@ SEApp enables developers to define ad-hoc Mandatory Access Control policies for 
 
 While developing SEApp, dedicated attention was paid to:
 
-- preserve system security assumptions (e.g., do not alter the default behavior of key system services, do not provide to `untrusted_app` potentially dangerous SELinux permissions, etc.)
+- preserve system security assumptions (e.g., do not alter the default behavior of key system services; do not provide to `untrusted_app` potentially dangerous SELinux permissions; etc.)
 - provide a solution with negligible performance impact at runtime and limited performance impact at install time
-- give to the developers an easy-to-use solution, that does not require the developer to understand system security internals
+- give to the developers an easy-to-use solution that does not require the developer to understand system security internals
 - provide a solution that is fully backward compatible
 
 The latest version of this set of modifications satisfies the previous requirements, though further improvements
 may be necessary to facilitate the use of SEApp to a wider range of application developers.
 
-## Enstablishing a Build Environment
+## Establishing a Build Environment
 
 Ensure your system meets the [hardware and software requirements](https://source.android.com/setup/build/requirements).
 
@@ -71,7 +71,7 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 ### Emulator
 
-Follow the instruction in [Establishing a Build Environment](#enstablishing-a-build-environment) and [Build and run it](#build-and-run-it) with the 
+Follow the instruction in [Establishing a Build Environment](#establishing-a-build-environment) and [Build and run it](#build-and-run-it) with the 
 exception that when choosing the build target you should choose `sdk_phone_x86_64` (as suggested in [building AVD images](https://source.android.com/setup/create/avd#building_avd_images)).
 
 To improve emulator performance we recommend to enable CPU virtualization extensions and build an x86 64-bit AVD.
