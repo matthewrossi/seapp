@@ -1,7 +1,7 @@
 # SEApp: Bringing Mandatory Access Control to Android Apps
 
 SEApp enables developers to define ad-hoc Mandatory Access Control policies for
-their apps. This repository provides a set of modifications to the
+their apps. This repository provides a set of changes to the
 [Android Open Source Project](https://source.android.com/).
 
 ## Motivation
@@ -23,7 +23,7 @@ ability to apply MAC to the internal structure of the app would provide stronger
 protection against a number of common [internal vulnerabilities](https://static.googleusercontent.com/media/www.google.com/en//about/appsecurity/play-rewards/Android_app_vulnerability_classes.pdf) (see the [Showcase app](./app/ShowcaseApp) to have a glimpse of SEApp capabilities).
 
 The following image depicts the evolution of SELinux since its introduction in
-Android, and the changes introduced by SEApp.
+Android, and the improvement introduced by SEApp.
 
 <p align="center">
     <img src="https://user-images.githubusercontent.com/15113769/94135458-c9dad280-fe63-11ea-901d-94c47fb20d59.jpg"
@@ -41,7 +41,7 @@ While developing SEApp, dedicated attention was paid to:
 - give to the developers an easy-to-use solution that does not require the developer to understand system security internals
 - provide a solution that is fully backward compatible
 
-The latest version of this set of modifications satisfies the previous requirements, though further improvements
+The latest version satisfies the previous requirements, though further improvements
 may be necessary to facilitate the use of SEApp to a wider range of application developers.
 
 ## Establishing a Build Environment
@@ -55,7 +55,7 @@ according to your operating system.
 Download the source tree for the specific `android-10.0.0_r41` code-line, which is what this branch is based on.
 See [Downloading the Source](https://source.android.com/setup/build/downloading) for the step-by-step instructions.
 
-Finally, overwrite the AOSP files with the ones provided in this repository to
+Finally, overwrite the AOSP files with the ones provided under [platform](platform) in this repository to
 add SEApp functionality within the AOSP source tree.
 
 ## Build and run it
@@ -82,11 +82,9 @@ To improve emulator performance we recommend to enable CPU virtualization extens
 - Android 9 ([branch](https://github.com/matthewrossi/seapp/tree/android-9.0.0))
 - Android 8.1 ([branch](https://github.com/matthewrossi/seapp/tree/android-8.1.0))
 
-# Paper
+## References
 
-The work is described by the publication:
-
-- title `SEApp: Bringing Mandatory Access Control to Android Apps`
-- authors: `Matthew Rossi, Dario Facchinetti, Enrico Bacis, Marco Rosa` and `Stefano Paraboschi`
-
-(to appear in the 30th USENIX Security Symposium)
+<a id="1">[1]</a>
+M. Rossi, D. Facchinetti, E. Bacis, M. Rosa and S. Paraboschi.
+SEApp: Bringing Mandatory Access Control to Android Apps.
+In _Proceeding of the 30th USENIX Security Symposium_, 2021. (Available soon).
