@@ -36,13 +36,15 @@ SEApp enables developers to define ad-hoc Mandatory Access Control policies for 
 
 While developing SEApp, dedicated attention was paid to:
 
-- preserve system security assumptions (e.g., do not alter the default behavior of key system services; do not provide to `untrusted_app` potentially dangerous SELinux permissions; etc.)
+- preserve system security assumptions (e.g., do not alter the default behavior of key system services; do not provide `untrusted_app` with potentially dangerous SELinux permissions; etc.)
 - provide a solution with negligible performance impact at runtime and limited performance impact at install time
 - give to the developers an easy-to-use solution that does not require the developer to understand system security internals
 - provide a solution that is fully backward compatible
 
 The latest version satisfies the previous requirements, though further improvements
 may be necessary to facilitate the use of SEApp to a wider range of application developers.
+
+You can find additional information in our publication [[1]](#1).
 
 ## Establishing a Build Environment
 
@@ -71,7 +73,7 @@ Follow the [Building Android](https://source.android.com/setup/build/building) g
 
 ### Emulator
 
-Follow the instruction in [Establishing a Build Environment](#establishing-a-build-environment) and [Build and run it](#build-and-run-it) with the 
+Follow the instruction in [Establishing a Build Environment](#establishing-a-build-environment) and [Build and run it](#build-and-run-it) with the
 exception that when choosing the build target you should choose `sdk_phone_x86_64` (as suggested in [building AVD images](https://source.android.com/setup/create/avd#building_avd_images)).
 
 To improve emulator performance we recommend to enable CPU virtualization extensions and build an x86 64-bit AVD.
