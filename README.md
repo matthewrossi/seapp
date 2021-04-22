@@ -89,4 +89,4 @@ To improve emulator performance we recommend to enable CPU virtualization extens
 <a id="1">[1]</a>
 M. Rossi, D. Facchinetti, E. Bacis, M. Rosa and S. Paraboschi.
 SEApp: Bringing Mandatory Access Control to Android Apps.
-In _Proceeding of the 30th USENIX Security Symposium_, 2021. (Available soon).
+In _Proceeding of the 30th USENIX Security Symposium_, 2021. ([Available here](https://cs.unibg.it/seclab-papers/2021/USENIX/seapp.pdf)).
