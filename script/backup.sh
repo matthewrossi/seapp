@@ -38,6 +38,7 @@ fi
 if [ -z $backup ]; then
 	backup="$source/backup"
 fi
+backup=$(realpath -s $backup)
 
 # remove options
 shift $((OPTIND -1))
